@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="?android:listPreferredItemHeight"
+        android:background="@color/colorPrimary">
+
+        <ImageView android:id="@+id/list_picker_dialog_base_icon"
+            android:layout_marginStart="@dimen/list_picker_dialog_base_icon_margin"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:src="@null"
+            android:scaleType="centerInside"
+            android:contentDescription="@string/list_picker_dialog_base_no_text"
+            android:background="@null" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_gravity="center_vertical">
+
+            <TextView android:id="@+id/list_picker_dialog_base_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/list_picker_dialog_base_text_margin"
+                android:layout_marginEnd="@dimen/list_picker_dialog_base_text_margin"
+                android:background="@null"
+                android:textSize="@dimen/list_picker_dialog_base_title_size"
+                android:textStyle="bold"
+                android:text="@string/list_picker_dialog_base_no_text"
+                android:textColor="@color/textColorPrimary"
+                style="@style/text_view_auto_scroll"
+                />
+
+            <TextView android:id="@+id/list_picker_dialog_base_sub_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/list_picker_dialog_base_text_margin"
+                android:layout_marginEnd="@dimen/list_picker_dialog_base_text_margin"
+                android:background="@null"
+                android:textSize="@dimen/list_picker_dialog_base_sub_title_size"
+                android:text="@string/list_picker_dialog_base_no_text"
+                android:textColor="@color/textColorSecondary"
+                style="@style/text_view_auto_scroll" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        style="?android:attr/background">
+
+        <ListView android:id="@+id/list_picker_dialog_base_list"
+            android:layout_above="@+id/list_picker_dialog_base_buttons"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:foreground="@drawable/fg_bottom_shadow"
+            android:layout_gravity="center_horizontal"
+            tools:listitem="@layout/list_picker_dialog_base_item"/>
+
+        <LinearLayout android:id="@+id/list_picker_dialog_base_buttons"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="@dimen/list_picker_dialog_base_button_margin"
+            android:paddingBottom="@dimen/list_picker_dialog_base_button_margin"
+            android:layout_gravity="center_horizontal"
+            android:layout_alignParentBottom="true">
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@null" />
+
+            <Button android:id="@+id/list_picker_dialog_base_cancel_button"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/list_picker_dialog_base_button_height"
+                android:layout_marginStart="@dimen/list_picker_dialog_base_button_margin"
+                android:layout_marginEnd="@dimen/list_picker_dialog_base_button_margin"
+                android:paddingTop="0dp"
+                android:paddingBottom="0dp"
+                android:paddingStart="@dimen/list_picker_dialog_base_button_padding"
+                android:paddingEnd="@dimen/list_picker_dialog_base_button_padding"
+                android:background="@drawable/rp_picker_button"
+                android:text="@string/list_picker_dialog_base_cancel_button"
+                android:textColor="@drawable/tc_picker_button" />
+
+            <Button android:id="@+id/list_picker_dialog_base_select_button"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/list_picker_dialog_base_button_height"
+                android:layout_marginStart="@dimen/list_picker_dialog_base_button_margin"
+                android:layout_marginEnd="@dimen/list_picker_dialog_base_button_margin"
+                android:paddingTop="0dp"
+                android:paddingBottom="0dp"
+                android:paddingStart="@dimen/list_picker_dialog_base_button_padding"
+                android:paddingEnd="@dimen/list_picker_dialog_base_button_padding"
+                android:background="@drawable/rp_picker_button"
+                android:text="@string/list_picker_dialog_base_select_button"
+                android:textColor="@drawable/tc_picker_button"
+                android:textIsSelectable="false" />
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+</LinearLayout>

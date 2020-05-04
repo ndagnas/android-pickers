@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- layout / list_picker_dialog_base -->
+
+    <dimen name="list_picker_dialog_base_icon_margin">16dp</dimen>
+    <dimen name="list_picker_dialog_base_text_margin">16dp</dimen>
+    <dimen name="list_picker_dialog_base_title_size">16sp</dimen>
+    <dimen name="list_picker_dialog_base_sub_title_size">14sp</dimen>
+    <dimen name="list_picker_dialog_base_button_margin">8dp</dimen>
+    <dimen name="list_picker_dialog_base_button_padding">12dp</dimen>
+    <dimen name="list_picker_dialog_base_button_height">40dp</dimen>
+
+    <!-- layout / list_picker_dialog_base_item -->
+
+    <dimen name="list_picker_dialog_base_item_icon_margin">8dp</dimen>
+    <dimen name="list_picker_dialog_base_item_title_size">16sp</dimen>
+    <dimen name="list_picker_dialog_base_item_sub_text_size">12sp</dimen>
+    <dimen name="list_picker_dialog_base_item_checkbox_margin">8dp</dimen>
+
+</resources>

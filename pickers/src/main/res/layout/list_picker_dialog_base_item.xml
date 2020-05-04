@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:focusable="false"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:minHeight="?android:listPreferredItemHeight"
+    android:descendantFocusability="blocksDescendants"
+    android:clickable="true"
+    android:background="?android:attr/selectableItemBackground"
+    style="?android:attr/background">
+
+    <ImageView android:id="@+id/list_picker_dialog_base_item_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_marginStart="@dimen/list_picker_dialog_base_item_icon_margin"
+        android:scaleType="centerInside"
+        android:contentDescription="@string/list_picker_dialog_base_item_no_text"
+        android:layout_gravity="center"/>
+
+    <RelativeLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:minHeight="?android:listPreferredItemHeight"
+        android:layout_marginStart="@dimen/list_picker_dialog_base_item_icon_margin"
+        android:layout_weight="1"
+        android:focusable="false"
+        style="?android:attr/background">
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:focusable="false"
+            android:layout_centerVertical="true"
+            style="?android:attr/background">
+
+            <TextView android:id="@+id/list_picker_dialog_base_item_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/list_picker_dialog_base_item_checkbox_margin"
+                android:textStyle="bold"
+                android:textSize="@dimen/list_picker_dialog_base_item_title_size"
+                android:text="@string/list_picker_dialog_base_item_no_text"
+                style="?android:attr/textAppearanceLarge" />
+
+            <TextView android:id="@+id/list_picker_dialog_base_item_sub_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/list_picker_dialog_base_item_checkbox_margin"
+                android:textSize="@dimen/list_picker_dialog_base_item_sub_text_size"
+                android:text="@string/list_picker_dialog_base_item_no_text"
+                style="@style/text_view_auto_scroll" />
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+    <CheckBox android:id="@+id/list_picker_dialog_base_item_checkbox"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="center_vertical"
+        android:layout_marginEnd="@dimen/list_picker_dialog_base_item_checkbox_margin"
+        android:buttonTint="@color/colorAccent"/>
+
+</LinearLayout>

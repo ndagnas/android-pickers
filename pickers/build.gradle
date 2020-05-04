@@ -1,0 +1,60 @@
+apply plugin: 'com.android.library'
+
+ext {
+    bintrayRepo = 'maven'
+    bintrayName = 'Picker-Dialogs'
+
+    publishedGroupId = 'com.github.ndagnas'
+    libraryName = 'Picker-Dialogs'
+    artifact = 'pickers'
+
+    libraryDescription = 'Android library providing a list of selectors.'
+
+    siteUrl = 'https://github.com/ndagnas/android-pickers'
+    gitUrl = 'https://github.com/ndagnas/android-pickers.git'
+
+    libraryVersion = '0.1.0'
+
+    developerId = 'ndagnas'
+    developerName = 'Nicolas Dagnas'
+    developerEmail = 'ndagnas@live.fr'
+
+    licenseName = 'The Apache Software License, Version 2.0'
+    licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+    allLicenses = ["Apache-2.0"]
+
+    Properties properties = new Properties()
+    properties.load(project.rootProject.file('local.properties').newDataInputStream())
+
+    //Bintray Credentials
+    bintrayUsername = properties.getProperty("bintray.apikey") // Your Bintray username
+    bintrayApiKey = properties.getProperty("bintray.apikey") // API Key you copied in previous step
+    bintrayUserOrg = properties.getProperty("bintray.userorg") // Organization you created in Bintray
+}
+
+android {
+    compileSdkVersion 29
+
+    defaultConfig {
+        minSdkVersion 26
+        targetSdkVersion 29
+        versionCode 1
+        versionName "0.1.0"
+    }
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    lintOptions {
+        abortOnError false
+    }
+}
+
+dependencies {
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+}
+
+apply from: 'https://raw.githubusercontent.com/ndagnas/JCenter/master/installv1.gradle'
+apply from: 'https://raw.githubusercontent.com/ndagnas/JCenter/master/bintrayv1.gradle'

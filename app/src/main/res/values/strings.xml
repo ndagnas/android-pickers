@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="en" tools:ignore="MissingTranslation">
+
+    <string name="app_name">Pickers Demo</string>
+
+    <!-- layout / activity_main -->
+
+    <string name="activity_main_selection_mode">Selection Mode</string>
+    <string name="activity_main_selection_mode_single">Single</string>
+    <string name="activity_main_selection_mode_multiple">Multiple</string>
+
+    <string name="activity_main_selection_type">Selection Type</string>
+    <string name="activity_main_selection_type_file">File</string>
+    <string name="activity_main_selection_type_directory">Directory</string>
+    <string name="activity_main_selection_type_files_and_directories">Files and Directories</string>
+
+    <string name="activity_main_patterns">Pattern (regex mode)</string>
+    <string name="activity_main_patterns_samples">ex: \"(.*)\\\\.txt\" (for: \"*.txt\" files)</string>
+
+    <string name="activity_main_root_directory">Root Directory</string>
+    <string name="activity_main_root_directory_samples">ex: /mnt/sdcard or leave empty</string>
+
+    <string name="activity_main_show_file_picker_dialog">Show File Picker Dialog</string>
+
+    <string name="activity_main_show_json_picker_dialog">Show Json Picker Dialog</string>
+
+</resources>

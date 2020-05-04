@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- layout / FilePickerDialog -->
+
+    <string name="file_picker_dialog_date_format">dd.MM.yyyy, HH:mm</string>
+
+</resources>

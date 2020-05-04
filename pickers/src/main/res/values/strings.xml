@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="en" tools:ignore="MissingTranslation">
+
+   <!-- view / FilePickerDialog -->
+
+   <string name="file_picker_dialog_error_dir_access">Directory cannot be accessed</string>
+   <string name="file_picker_dialog_parent_directory" translatable="false">...</string>
+   <string name="file_picker_dialog_parent_directory_text">Parent Directory</string>
+   <string name="file_picker_dialog_date_format">dd.MM.yyyy, HH:mm</string>
+   <string name="file_picker_dialog_last_edit_file">%s - Last edited: %s</string>
+   <string name="file_picker_dialog_last_edit_directory">Last edited: %s</string>
+
+   <!-- view / JsonPickerDialog -->
+
+   <string name="json_picker_dialog_error_dir_access">Root node have not good format</string>
+   <string name="json_picker_dialog_parent_directory" translatable="false">...</string>
+   <string name="json_picker_dialog_parent_directory_text">Parent Node</string>
+
+   <!-- layout / list_picker_dialog_base -->
+
+   <string name="list_picker_dialog_base_no_text">&#8230;</string>
+   <string name="list_picker_dialog_base_cancel_button">Cancel</string>
+   <string name="list_picker_dialog_base_select_button">Select</string>
+
+   <!-- layout / list_picker_dialog_base_item -->
+
+   <string name="list_picker_dialog_base_item_no_text">&#8230;</string>
+
+</resources>

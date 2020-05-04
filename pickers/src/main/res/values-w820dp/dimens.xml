@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- layout / list_picker_dialog_base -->
+
+    <dimen name="list_picker_dialog_base_icon_margin">32dp</dimen>
+
+    <!-- layout / list_picker_dialog_base_item -->
+
+    <dimen name="list_picker_dialog_base_item_checkbox_margin">16dp</dimen>
+
+</resources>
