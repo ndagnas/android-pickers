@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.ndagnas</groupId>
     <artifactId>pickers</artifactId>
-    <version>0.1.0</version>
+    <version>0.1.2</version>
     <packaging>pom</packaging>
     <name>Android library providing a list of selectors</name>
 
