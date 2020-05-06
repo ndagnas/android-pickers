@@ -28,6 +28,14 @@ Android Library to create picker dialogs.
 ### Installation
 * Library is also Available in JCenter, So just put this in your app dependencies to use it:
 ```gradle
+    repositories {
+		...
+        jcenter()
+		...
+    }
+```
+
+```gradle
     compile 'com.github.ndagnas:pickers:0.1.2'
 ```
 
@@ -109,11 +117,11 @@ Marshmallow and above requests for the permission on runtime. You should overrid
 ### Screenshot
 <p align="center">
  </br>
- <img src="screenshots/file_picker.png" width="250">
+ <img src="screenshots/file_picker.jpg" width="250">
  &nbsp;
- <img src="screenshots/file_picker_dark.png" width="250">
+ <img src="screenshots/file_picker_dark.jpg" width="250">
  &nbsp;
- <img src="screenshots/json_picker.png" width="250">
+ <img src="screenshots/json_picker.jpg" width="250">
 </p>
 
 ### License
