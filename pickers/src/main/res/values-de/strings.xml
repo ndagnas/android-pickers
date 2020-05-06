@@ -7,6 +7,9 @@
    <string name="file_picker_dialog_parent_directory_text">Verzeichnis hoch</string>
    <string name="file_picker_dialog_last_edit_file">%s - Geändert am: %s</string>
    <string name="file_picker_dialog_last_edit_directory">Geändert am: %s</string>
+   <string name="file_picker_dialog_sort_name">Name</string>
+   <string name="file_picker_dialog_sort_date">Datum</string>
+   <string name="file_picker_dialog_sort_size">Größe</string>
 
    <!-- view / JsonPickerDialog -->
 

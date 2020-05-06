@@ -3,7 +3,7 @@
 
     <!-- ListPickerDialogBase -->
 
-    <style name="ListPickerDialogBase" parent="Base.Theme.AppCompat.Light.Dialog">
+    <style name="ListPickerDialogBase" parent="Theme.AppCompat.DayNight.Dialog">
         <item name="android:windowMinWidthMajor">98%</item>
         <item name="android:windowMinWidthMinor">98%</item>
     </style>

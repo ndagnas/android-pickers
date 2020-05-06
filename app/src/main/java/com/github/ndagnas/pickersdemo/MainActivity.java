@@ -53,6 +53,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        this.mProperties.selectionMode = FilePickerDialog.SINGLE_MODE;
+        this.mProperties.selectionType = FilePickerDialog.FILE_AND_DIR_SELECT;
+
         this.setContentView(R.layout.activity_main);
 
         RadioGroup selectionMode = this.findViewById(R.id.activity_main_selection_mode);

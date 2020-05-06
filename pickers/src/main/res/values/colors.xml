@@ -2,6 +2,8 @@
 <resources>
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorAccent">#3F51B5</color>
-    <color name="textColorPrimary">#FFFFFF</color>
-    <color name="textColorSecondary">#FFFFFF</color>
+    <color name="actionMenuTextColor">#FFFFFF</color>
+
+    <!-- <color name="itemColorPrimary2">@color/primary_text_default_material_light</color> -->
+    <!-- <color name="itemColorSecondary2">@color/secondary_text_default_material_light</color> -->
 </resources>

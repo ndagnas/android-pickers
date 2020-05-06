@@ -19,10 +19,9 @@
             android:contentDescription="@string/list_picker_dialog_base_no_text"
             android:background="@null" />
 
-        <LinearLayout
+        <LinearLayout android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
             android:layout_gravity="center_vertical">
 
             <TextView android:id="@+id/list_picker_dialog_base_title"
@@ -34,9 +33,8 @@
                 android:textSize="@dimen/list_picker_dialog_base_title_size"
                 android:textStyle="bold"
                 android:text="@string/list_picker_dialog_base_no_text"
-                android:textColor="@color/textColorPrimary"
-                style="@style/text_view_auto_scroll"
-                />
+                android:textColor="@color/actionMenuTextColor"
+                style="@style/text_view_auto_scroll" />
 
             <TextView android:id="@+id/list_picker_dialog_base_sub_title"
                 android:layout_width="wrap_content"
@@ -46,23 +44,30 @@
                 android:background="@null"
                 android:textSize="@dimen/list_picker_dialog_base_sub_title_size"
                 android:text="@string/list_picker_dialog_base_no_text"
-                android:textColor="@color/textColorSecondary"
+                android:textColor="@color/actionMenuTextColor"
                 style="@style/text_view_auto_scroll" />
 
         </LinearLayout>
 
     </LinearLayout>
 
+    <LinearLayout android:id="@+id/list_picker_dialog_base_toolbar"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?android:attr/colorBackground">
+    </LinearLayout>
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        style="?android:attr/background">
+        android:background="?android:attr/colorBackground">
 
         <ListView android:id="@+id/list_picker_dialog_base_list"
             android:layout_above="@+id/list_picker_dialog_base_buttons"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:foreground="@drawable/fg_bottom_shadow"
+            android:foreground="@drawable/fg_list_shadow"
             android:layout_gravity="center_horizontal"
             tools:listitem="@layout/list_picker_dialog_base_item"/>
 
@@ -83,30 +88,29 @@
 
             <Button android:id="@+id/list_picker_dialog_base_cancel_button"
                 android:layout_width="wrap_content"
-                android:layout_height="@dimen/list_picker_dialog_base_button_height"
+                android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/list_picker_dialog_base_button_margin"
                 android:layout_marginEnd="@dimen/list_picker_dialog_base_button_margin"
                 android:paddingTop="0dp"
                 android:paddingBottom="0dp"
                 android:paddingStart="@dimen/list_picker_dialog_base_button_padding"
                 android:paddingEnd="@dimen/list_picker_dialog_base_button_padding"
-                android:background="@drawable/rp_picker_button"
                 android:text="@string/list_picker_dialog_base_cancel_button"
-                android:textColor="@drawable/tc_picker_button" />
+                android:textColor="@drawable/tc_list_picker_dialog_button"
+                style="?android:attr/buttonBarButtonStyle" />
 
             <Button android:id="@+id/list_picker_dialog_base_select_button"
                 android:layout_width="wrap_content"
-                android:layout_height="@dimen/list_picker_dialog_base_button_height"
+                android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/list_picker_dialog_base_button_margin"
                 android:layout_marginEnd="@dimen/list_picker_dialog_base_button_margin"
                 android:paddingTop="0dp"
                 android:paddingBottom="0dp"
                 android:paddingStart="@dimen/list_picker_dialog_base_button_padding"
                 android:paddingEnd="@dimen/list_picker_dialog_base_button_padding"
-                android:background="@drawable/rp_picker_button"
                 android:text="@string/list_picker_dialog_base_select_button"
-                android:textColor="@drawable/tc_picker_button"
-                android:textIsSelectable="false" />
+                android:textColor="@drawable/tc_list_picker_dialog_button"
+                style="?android:attr/buttonBarButtonStyle" />
 
         </LinearLayout>
 

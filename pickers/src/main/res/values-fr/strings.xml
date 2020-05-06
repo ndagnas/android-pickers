@@ -7,6 +7,9 @@
    <string name="file_picker_dialog_parent_directory_text">Répertoire parent</string>
    <string name="file_picker_dialog_last_edit_file">%s - Modifié le : %s</string>
    <string name="file_picker_dialog_last_edit_directory">Modifié le : %s</string>
+   <string name="file_picker_dialog_sort_name">Nom</string>
+   <string name="file_picker_dialog_sort_date">Date</string>
+   <string name="file_picker_dialog_sort_size">Taille</string>
 
    <!-- view / JsonPickerDialog -->
 

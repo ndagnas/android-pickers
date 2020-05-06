@@ -8,8 +8,7 @@
     android:minHeight="?android:listPreferredItemHeight"
     android:descendantFocusability="blocksDescendants"
     android:clickable="true"
-    android:background="?android:attr/selectableItemBackground"
-    style="?android:attr/background">
+    android:background="?android:attr/selectableItemBackground">
 
     <ImageView android:id="@+id/list_picker_dialog_base_item_icon"
         android:layout_width="wrap_content"
@@ -43,6 +42,7 @@
                 android:textStyle="bold"
                 android:textSize="@dimen/list_picker_dialog_base_item_title_size"
                 android:text="@string/list_picker_dialog_base_item_no_text"
+                android:textColor="?android:attr/textColorPrimary"
                 style="?android:attr/textAppearanceLarge" />
 
             <TextView android:id="@+id/list_picker_dialog_base_item_sub_title"
@@ -51,6 +51,7 @@
                 android:layout_marginEnd="@dimen/list_picker_dialog_base_item_checkbox_margin"
                 android:textSize="@dimen/list_picker_dialog_base_item_sub_text_size"
                 android:text="@string/list_picker_dialog_base_item_no_text"
+                android:textColor="?android:attr/textColorSecondary"
                 style="@style/text_view_auto_scroll" />
 
         </LinearLayout>

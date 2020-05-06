@@ -13,7 +13,7 @@ ext {
     siteUrl = 'https://github.com/ndagnas/android-pickers'
     gitUrl = 'https://github.com/ndagnas/android-pickers.git'
 
-    libraryVersion = '0.1.0'
+    libraryVersion = '0.1.2'
 
     developerId = 'ndagnas'
     developerName = 'Nicolas Dagnas'
@@ -27,7 +27,7 @@ ext {
     properties.load(project.rootProject.file('local.properties').newDataInputStream())
 
     //Bintray Credentials
-    bintrayUsername = properties.getProperty("bintray.apikey") // Your Bintray username
+    bintrayUsername = properties.getProperty("bintray.user") // Your Bintray username
     bintrayApiKey = properties.getProperty("bintray.apikey") // API Key you copied in previous step
     bintrayUserOrg = properties.getProperty("bintray.userorg") // Organization you created in Bintray
 }
@@ -38,12 +38,12 @@ android {
     defaultConfig {
         minSdkVersion 26
         targetSdkVersion 29
-        versionCode 1
-        versionName "0.1.0"
+        versionCode 3
+        versionName "0.1.2"
     }
     buildTypes {
         release {
-            minifyEnabled true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }

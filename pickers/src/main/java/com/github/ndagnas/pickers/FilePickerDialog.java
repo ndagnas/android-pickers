@@ -17,18 +17,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- *    Created by Nicolas Dagnas on 01-05-2020, updated on 02-05-2020.
+ *    Created by Nicolas Dagnas on 01-05-2020.
  *
  */
 
 package com.github.ndagnas.pickers;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.annotation.NonNull;
+
 import java.io.File;
 import java.io.FileFilter;
 import java.text.DecimalFormat;
@@ -42,9 +50,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
-/**
- * Defines a file picker dialog.
- */
+/** Defines a file picker dialog. */
 @SuppressWarnings({"unused", "WeakerAccess"})
 public class FilePickerDialog extends ListPickerDialogBase {
     private static java.util.Locale DEF_LOCAL = java.util.Locale.getDefault();
@@ -135,6 +141,8 @@ public class FilePickerDialog extends ListPickerDialogBase {
 
             this.sortBy = FilePickerDialog.SORT_BY_NAME;
             this.sortOrder = FilePickerDialog.SORT_ORDER_NORMAL;
+
+            this.showToolbar = true;
         }
 
         /**
@@ -153,6 +161,7 @@ public class FilePickerDialog extends ListPickerDialogBase {
             result.patterns = this.patterns;
             result.sortBy = this.sortBy;
             result.sortOrder = this.sortOrder;
+            result.showToolbar = this.showToolbar;
 
             return result;
         }
@@ -231,6 +240,9 @@ public class FilePickerDialog extends ListPickerDialogBase {
          * <p>Set to SORT_ORDER_NORMAL as default value by constructor.
          */
         public int sortOrder;
+
+        /** indicates whether to display the toolbar used to manage sorting. */
+        public boolean showToolbar;
     }
 
     /** Class to filter the list of files. */
@@ -295,8 +307,12 @@ public class FilePickerDialog extends ListPickerDialogBase {
     private final Context mContext;
     private final Properties mProperties;
     private final ExtensionFilter mFilter;
-    private final Comparator<File> mSorter;
+    private Comparator<File> mSorter;
     private ValidateSelectionListener mListener;
+    private LinearLayout mToolbar = null;
+    private TextView mNameColumn = null;
+    private TextView mDateColumn = null;
+    private TextView mSizeColumn = null;
     private static DecimalFormat mSizeDecimalFormat;
 
     /**
@@ -487,7 +503,174 @@ public class FilePickerDialog extends ListPickerDialogBase {
         return comparator;
     }
 
+    /* ---- Toolbar Methods ---- */
+
+    /** Actualize toolbar. */
+    private void actualizeToolbar() {
+        // Sort by name
+
+        if (this.mProperties.sortBy == FilePickerDialog.SORT_BY_NAME) {
+            if (this.mProperties.sortOrder == FilePickerDialog.SORT_ORDER_NORMAL)
+                this.mNameColumn.setCompoundDrawablesWithIntrinsicBounds(
+                        0, 0, R.drawable.ic_file_picker_up, 0);
+            else
+                this.mNameColumn.setCompoundDrawablesWithIntrinsicBounds(
+                        0, 0, R.drawable.ic_file_picker_down, 0);
+        } else {
+            this.mNameColumn.setCompoundDrawables(null, null, null, null);
+        }
+
+        // Sort by date
+
+        if (this.mProperties.sortBy == FilePickerDialog.SORT_BY_LAST_MODIFIED) {
+            if (this.mProperties.sortOrder == FilePickerDialog.SORT_ORDER_NORMAL)
+                this.mDateColumn.setCompoundDrawablesWithIntrinsicBounds(
+                        0, 0, R.drawable.ic_file_picker_up, 0);
+            else
+                this.mDateColumn.setCompoundDrawablesWithIntrinsicBounds(
+                        0, 0, R.drawable.ic_file_picker_down, 0);
+        } else {
+            this.mDateColumn.setCompoundDrawables(null, null, null, null);
+        }
+
+        // Sort by size
+
+        if (this.mProperties.sortBy == FilePickerDialog.SORT_BY_SIZE) {
+            if (this.mProperties.sortOrder == FilePickerDialog.SORT_ORDER_NORMAL)
+                this.mSizeColumn.setCompoundDrawablesWithIntrinsicBounds(
+                        0, 0, R.drawable.ic_file_picker_up, 0);
+            else
+                this.mSizeColumn.setCompoundDrawablesWithIntrinsicBounds(
+                        0, 0, R.drawable.ic_file_picker_down, 0);
+        } else {
+            this.mSizeColumn.setCompoundDrawables(null, null, null, null);
+        }
+    }
+
+    /**
+     * Actualize item comparator with new sorter order.
+     *
+     * @param sortOrder new sorter order.
+     */
+    private void actualizeComparator(int sortOrder) {
+        if (this.mProperties.sortBy == sortOrder) {
+            if (this.mProperties.sortOrder == FilePickerDialog.SORT_ORDER_NORMAL)
+                this.mProperties.sortOrder = FilePickerDialog.SORT_ORDER_REVERSE;
+            else this.mProperties.sortOrder = FilePickerDialog.SORT_ORDER_NORMAL;
+        } else {
+            this.mProperties.sortBy = sortOrder;
+
+            switch (sortOrder) {
+                case FilePickerDialog.SORT_BY_LAST_MODIFIED:
+                    this.mProperties.sortOrder = FilePickerDialog.SORT_ORDER_REVERSE;
+                    break;
+                case FilePickerDialog.SORT_BY_SIZE:
+                    this.mProperties.sortOrder = FilePickerDialog.SORT_ORDER_REVERSE;
+                    break;
+                default:
+                    this.mProperties.sortOrder = FilePickerDialog.SORT_ORDER_NORMAL;
+                    break;
+            }
+        }
+
+        this.mSorter = createComparator(this.mProperties);
+
+        this.actualizeToolbar();
+        this.reload();
+    }
+
+    /**
+     * Get toolbar from view.
+     *
+     * @param toolbar toolbar resource.
+     * @return a view contains toolbar.
+     */
+    private View getToolbar(View toolbar) {
+        if (!(toolbar instanceof LinearLayout)) return null;
+
+        this.mToolbar = (LinearLayout) toolbar;
+
+        this.mNameColumn = this.mToolbar.findViewById(R.id.file_picker_dialog_sort_name_label);
+        this.mDateColumn = this.mToolbar.findViewById(R.id.file_picker_dialog_sort_date_label);
+        this.mSizeColumn = this.mToolbar.findViewById(R.id.file_picker_dialog_sort_size_label);
+
+        this.actualizeToolbar();
+
+        // Name column
+
+        RelativeLayout nameButton = this.mToolbar.findViewById(R.id.file_picker_dialog_sort_name);
+
+        nameButton.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        FilePickerDialog.this.actualizeComparator(FilePickerDialog.SORT_BY_NAME);
+                    }
+                });
+
+        // Date column
+
+        RelativeLayout dateButton = this.mToolbar.findViewById(R.id.file_picker_dialog_sort_date);
+
+        dateButton.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        FilePickerDialog.this.actualizeComparator(
+                                FilePickerDialog.SORT_BY_LAST_MODIFIED);
+                    }
+                });
+
+        // Size column
+
+        RelativeLayout sizeButton = this.mToolbar.findViewById(R.id.file_picker_dialog_sort_size);
+
+        sizeButton.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        FilePickerDialog.this.actualizeComparator(FilePickerDialog.SORT_BY_SIZE);
+                    }
+                });
+
+        // Actualize button
+
+        RelativeLayout actualizeButton =
+                this.mToolbar.findViewById(R.id.file_picker_dialog_actualize);
+
+        actualizeButton.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        FilePickerDialog.this.reload();
+                    }
+                });
+
+        return toolbar;
+    }
+
     /* ---- Derived Methods ---- */
+
+    /**
+     * generates a toolbar which will be placed between the title bar and the list.
+     *
+     * @return a view object.
+     */
+    @SuppressLint("InflateParams")
+    @Override
+    protected View createToolBar() {
+        if (!this.mProperties.showToolbar) {
+            return null;
+        }
+
+        if (this.mToolbar == null && this.mContext != null) {
+            LayoutInflater inflater = LayoutInflater.from(this.mContext);
+
+            return this.getToolbar(inflater.inflate(R.layout.file_picker_dialog_toolbar, null));
+        }
+
+        return this.mToolbar;
+    }
 
     /**
      * Obtains an item the list of items corresponding to the children of the root item.
@@ -685,7 +868,15 @@ public class FilePickerDialog extends ListPickerDialogBase {
 
             String subTitle = String.format(Locale.getDefault(), Label, itemDate);
 
-            return new Item(file.getName(), subTitle, R.drawable.ic_file_picker_folder, file, true);
+            switch (this.mProperties.selectionType) {
+                case FilePickerDialog.DIR_SELECT:
+                case FilePickerDialog.FILE_AND_DIR_SELECT:
+                    return new PickableItem(
+                            file.getName(), subTitle, R.drawable.ic_file_picker_folder, file, true);
+                default:
+                    return new Item(
+                            file.getName(), subTitle, R.drawable.ic_file_picker_folder, file, true);
+            }
         } else {
             String Label = super.getContext().getString(R.string.file_picker_dialog_last_edit_file);
 
@@ -729,6 +920,15 @@ public class FilePickerDialog extends ListPickerDialogBase {
     }
 
     /* ---- Public Methods ---- */
+
+    /**
+     * Get current properties.
+     *
+     * @return a properties object.
+     */
+    public Properties getProperties() {
+        return this.mProperties.cloneProperties();
+    }
 
     /**
      * Allows you to be informed when validating the file selection.

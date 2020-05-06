@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/file_picker_dialog_header"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:focusable="false"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:descendantFocusability="blocksDescendants"
+    android:background="@color/actionMenuTextColor">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="32dp"
+        android:layout_marginTop="1dp"
+        tools:ignore="UselessParent">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:rowCount="1"
+            android:layout_weight="1">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@color/colorAccent"
+                tools:ignore="NestedWeights">
+
+                <RelativeLayout android:id="@+id/file_picker_dialog_sort_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:clickable="true"
+                    android:background="?android:attr/selectableItemBackground">
+
+                    <TextView android:id="@+id/file_picker_dialog_sort_name_label"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/file_picker_dialog_sort_name"
+                        android:textSize="14sp"
+                        android:textColor="@color/actionMenuTextColor"
+                        android:drawablePadding="4dp"
+                        android:layout_centerInParent="true"
+                        android:drawableEnd="@null"/>
+
+                </RelativeLayout>
+
+            </LinearLayout>
+
+            <Space android:layout_width="1dp" android:layout_height="match_parent" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@color/colorAccent"
+                tools:ignore="NestedWeights">
+
+                <RelativeLayout android:id="@+id/file_picker_dialog_sort_date"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:clickable="true"
+                    android:background="?android:attr/selectableItemBackground">
+
+                    <TextView android:id="@+id/file_picker_dialog_sort_date_label"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/file_picker_dialog_sort_date"
+                        android:textSize="14sp"
+                        android:layout_centerInParent="true"
+                        android:textColor="@color/actionMenuTextColor"
+                        android:drawablePadding="8dp"
+                        android:drawableEnd="@null"/>
+
+                </RelativeLayout>
+
+            </LinearLayout>
+
+            <Space android:layout_width="1dp" android:layout_height="match_parent" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@color/colorAccent"
+                tools:ignore="NestedWeights">
+
+                <RelativeLayout android:id="@+id/file_picker_dialog_sort_size"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:clickable="true"
+                    android:background="?android:attr/selectableItemBackground">
+
+                    <TextView android:id="@+id/file_picker_dialog_sort_size_label"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/file_picker_dialog_sort_size"
+                        android:layout_centerInParent="true"
+                        android:textSize="14sp"
+                        android:textColor="@color/actionMenuTextColor"
+                        android:drawablePadding="8dp"
+                        android:drawableEnd="@null"/>
+
+                </RelativeLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <Space android:layout_width="1dp" android:layout_height="match_parent" />
+
+        <RelativeLayout
+            android:layout_width="60dp"
+            android:layout_height="match_parent"
+            android:background="@color/colorAccent">
+
+            <RelativeLayout android:id="@+id/file_picker_dialog_actualize"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clickable="true"
+                android:background="?android:attr/selectableItemBackground">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:contentDescription="@string/file_picker_dialog_base_no_text"
+                    android:src="@drawable/ic_file_picker_refresh"/>
+
+            </RelativeLayout>
+
+        </RelativeLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

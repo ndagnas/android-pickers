@@ -33,9 +33,12 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
+
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -621,6 +624,16 @@ public class ListPickerDialogBase extends Dialog {
         this.mAdapter = new PickerAdapter(this);
 
         this.mListView.setAdapter(this.mAdapter);
+
+        View header = this.createToolBar();
+
+        if (header != null) {
+            LinearLayout headerLayout = this.findViewById(R.id.list_picker_dialog_base_toolbar);
+
+            if (headerLayout != null) {
+                headerLayout.addView(header);
+            }
+        }
     }
 
     /** Called on dialog show. */
@@ -649,7 +662,9 @@ public class ListPickerDialogBase extends Dialog {
             String btnName = this.mBtnCancelLabel;
 
             if (btnName == null || btnName.length() == 0)
-                btnName = super.getContext().getString(R.string.list_picker_dialog_base_cancel_button);
+                btnName =
+                        super.getContext()
+                                .getString(R.string.list_picker_dialog_base_cancel_button);
 
             this.mBtnCancel.setText(btnName);
         }
@@ -661,14 +676,16 @@ public class ListPickerDialogBase extends Dialog {
             String btnName = this.mBtnSelectLabel;
 
             if (btnName == null || btnName.length() == 0)
-                btnName = super.getContext().getString(R.string.list_picker_dialog_base_select_button);
+                btnName =
+                        super.getContext()
+                                .getString(R.string.list_picker_dialog_base_select_button);
 
             int pickedItemCount = this.mAdapter.getPickedItemCount();
 
             if (pickedItemCount > 0) {
                 this.mBtnSelect.setEnabled(true);
 
-                if (this.isMultiSelectMode()) {
+                if (pickedItemCount > 1) {
                     this.mBtnSelect.setText(
                             String.format(
                                     DEF_LOCAL,
@@ -742,6 +759,15 @@ public class ListPickerDialogBase extends Dialog {
     /* ---- Protected Methods, to be overridden in subclasses ---- */
 
     /**
+     * generates a toolbar which will be placed between the title bar and the list.
+     *
+     * @return a view object.
+     */
+    protected View createToolBar() {
+        return null;
+    }
+
+    /**
      * Obtains an item the list of items corresponding to the children of the root item.
      *
      * <p>Exemple: new Item ("File 1", "size: ...", R.drawable..., parent, true)
@@ -800,6 +826,14 @@ public class ListPickerDialogBase extends Dialog {
      * @param items collection of picked items.
      */
     protected void onValidateSelection(Collection<PickableItem> items) {}
+
+    /* ---- Protected Methods ---- */
+
+    /** Reload the list. */
+    protected void reload() {
+        if (this.mRootItem == null) this.navigateToItem(this.getRootItem());
+        else this.navigateToItem(this.mRootItem);
+    }
 
     /* ---- Public Methods ---- */
 

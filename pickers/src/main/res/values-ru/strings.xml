@@ -7,6 +7,9 @@
    <string name="file_picker_dialog_parent_directory_text">Родительская директория</string>
    <string name="file_picker_dialog_last_edit_file">%s - Изменено на: %s</string>
    <string name="file_picker_dialog_last_edit_directory">Изменено на: %s</string>
+   <string name="file_picker_dialog_sort_name">Имя</string>
+   <string name="file_picker_dialog_sort_date">Дата</string>
+   <string name="file_picker_dialog_sort_size">Размер</string>
 
    <!-- view / JsonPickerDialog -->
 

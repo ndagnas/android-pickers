@@ -9,7 +9,6 @@
     <dimen name="list_picker_dialog_base_sub_title_size">14sp</dimen>
     <dimen name="list_picker_dialog_base_button_margin">8dp</dimen>
     <dimen name="list_picker_dialog_base_button_padding">12dp</dimen>
-    <dimen name="list_picker_dialog_base_button_height">40dp</dimen>
 
     <!-- layout / list_picker_dialog_base_item -->
 
