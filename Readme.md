@@ -108,9 +108,7 @@ Marshmallow and above requests for the permission on runtime. You should overrid
 ```
 
 ### Important:
-* `defaultValue`, `error_dir`, `root_dir`, `offset_dir` must have valid directory/file paths.
-* `defaultValue` paths should end with ':'.
-* `defaultValue` can have multiple paths, there should be a ':' between two paths.
+* `root`, `errorDir`, `offsetDir` must have valid directory/file paths.
 * `patterns` must not have '.'.
 * `patterns` must are regexes.
 
