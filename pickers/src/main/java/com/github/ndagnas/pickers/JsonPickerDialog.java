@@ -13,53 +13,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- *    Created by Nicolas Dagnas on 01-05-2020, updated on 02-05-2020.
+ *    Created by Nicolas Dagnas on 01-05-2020, updated on 08-05-2020.
  *
  */
 
 package com.github.ndagnas.pickers;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
+import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
+
+import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
+import androidx.annotation.StyleRes;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 
-/** Defines a json picker dialog. */
+/** Defines a json picker dialog. *** */
 @SuppressWarnings({"unused", "WeakerAccess"})
-public class JsonPickerDialog extends ListPickerDialogBase {
-    private static java.util.Locale DEF_LOCAL = java.util.Locale.getDefault();
-
-    /** Defines a listener to be informed of the validation of the selection. */
-    public interface ValidateSelectionListener {
-        /**
-         * Called on dialog validation.
-         *
-         * @param object list of selected json nodes.
-         */
-        void onValidateSelection(JSONObject[] object);
-    }
-
-    // SELECTION_MODES
-
-    /**
-     * SINGLE_MODE specifies that a single json node has to be selected from the list of json nodes.
-     * It is the default Selection Mode.
-     */
-    public static final int SINGLE_MODE = 0;
-
-    /**
-     * MULTI_MODE specifies that multiple json node has to be selected from the list of json nodes.
-     */
-    public static final int MULTI_MODE = 1;
-
-    // SELECTION_TYPES
-
+public class JSonPickerDialog extends ListPickerDialogBase implements PickerInterface {
     /**
      * NODE_WITHOUT_CHILDREN_SELECT specifies that from list of json nodes without child has to be
      * selected. It is the default Selection Type.
@@ -84,115 +66,6 @@ public class JsonPickerDialog extends ListPickerDialogBase {
     /** SORT_ORDER_NORMAL specifies that list of json nodes is sorted by reverse order. */
     public static final int SORT_ORDER_REVERSE = 2;
 
-    /**
-     * Descriptor class to define properties of the Dialog. Actions are performed upon these
-     * Properties.
-     */
-    @SuppressWarnings("WeakerAccess")
-    public static class Properties {
-        /** Object initialisation. */
-        public Properties() {
-            this.selectionMode = JsonPickerDialog.SINGLE_MODE;
-            this.selectionType = JsonPickerDialog.ALL_NODE_SELECT;
-
-            this.jsonTitleNodeName = "";
-            this.jsonSubTitleNodeName = "";
-            this.jsonChildrenNodeName = "";
-
-            this.titleMask = null;
-            this.subTitleMask = null;
-
-            this.root = null;
-
-            this.sortBy = JsonPickerDialog.SORT_BY_TITLE;
-            this.sortOrder = JsonPickerDialog.SORT_ORDER_DISABLE;
-        }
-
-        /**
-         * Clone current object.
-         *
-         * @return a Properties object.
-         */
-        Properties cloneProperties() {
-            Properties result = new Properties();
-
-            result.selectionMode = this.selectionMode;
-            result.selectionType = this.selectionType;
-            result.jsonTitleNodeName = this.jsonTitleNodeName;
-            result.jsonSubTitleNodeName = this.jsonSubTitleNodeName;
-            result.jsonChildrenNodeName = this.jsonChildrenNodeName;
-            result.titleMask = this.titleMask;
-            result.subTitleMask = this.subTitleMask;
-            result.root = this.root;
-            result.sortBy = this.sortBy;
-            result.sortOrder = this.sortOrder;
-
-            return result;
-        }
-
-        /**
-         * Selection Mode defines whether a single of multiple json nodes have to be selected.
-         *
-         * <p>SINGLE_MODE and MULTI_MODE are the two selection modes.
-         *
-         * <p>Set to SINGLE_MODE as default value by constructor.
-         */
-        public int selectionMode;
-
-        /**
-         * Selection Type defines that whether a File/Directory or both of these has to be selected.
-         *
-         * <p>ALL_NODE_SELECT, NODE_WITHOUT_CHILD_SELECT are the three selection types.
-         *
-         * <p>Set to ALL_NODE_SELECT as default value by constructor.
-         */
-        public int selectionType;
-
-        /** The name of json node contains title item. */
-        public @NonNull String jsonTitleNodeName;
-
-        /** The name of json node contains sub-title item. */
-        public @NonNull String jsonSubTitleNodeName;
-
-        /** The name of json node contains child nodes. */
-        public @NonNull String jsonChildrenNodeName;
-
-        /**
-         * Mask of title item. Must contain one and only one '%s'.
-         *
-         * <p>Ex: "My item title: %s"
-         */
-        public String titleMask;
-
-        /**
-         * Mask of sub-title item. Must contain one and only one '%s'.
-         *
-         * <p>Ex: "My item sub-title: %s"
-         */
-        public String subTitleMask;
-
-        /** The root json node. List of json nodes are populated from here. */
-        public JSONObject root;
-
-        /**
-         * Sort by defines the sort order of the items.
-         *
-         * <p>SORT_BY_TITLE, SORT_BY_HAVE_CHILDREN are the two sort by.
-         *
-         * <p>SSet to SORT_BY_TITLE as default value by constructor.
-         */
-        public int sortBy;
-
-        /**
-         * Sort order defines the sort direction of the items.
-         *
-         * <p>SORT_ORDER_DISABLE, SORT_ORDER_NORMAL, SORT_ORDER_REVERSE are the three sort orders.
-         *
-         * <p>Set to SORT_ORDER_DISABLE as default value by constructor.
-         */
-        public int sortOrder;
-    }
-
     /** Defines an item of the list. */
     static class JSONItem {
         /**
@@ -213,36 +86,59 @@ public class JsonPickerDialog extends ListPickerDialogBase {
         public JSONItem parent;
     }
 
-    private final Properties mProperties;
+    private static java.util.Locale DEF_LOCAL = java.util.Locale.getDefault();
+
+    // Attributes
+
+    private final Context mContext;
+    private final int mSelectionType;
+    private final String mTitleNodeName;
+    private final String mSubTitleNodeName;
+    private final String mChildrenNodeName;
+    private final String mTitleMask;
+    private final String mSubTitleMask;
+    private final CharSequence mBackItemTitle;
+    private final JSONObject mRootNode;
+    private final int mSortBy;
+    private final int mSortOrder;
+    private final OnSingleChoiceValidationListener<JSONObject> mOnSingleChoiceValidationListener;
+    private final OnMultiChoiceValidationListener<JSONObject> mOnMultiChoiceValidationListener;
+    private final boolean mTitleNodeNameDefined;
+    private final boolean mSubTitleNodeNameDefined;
+    private final boolean mChildrenNodeNameDefined;
     private final Comparator<JSONItem> mSorter;
-    private ValidateSelectionListener mListener;
 
     /**
-     * Object initialisation.
+     * Create a list picker dialog.
      *
-     * @param context current context.
-     * @param properties picker properties.
+     * @param builder a builder object contains dialog parameters.
      */
-    public JsonPickerDialog(@NonNull Context context, @NonNull Properties properties) {
-        super(context, R.style.ListPickerDialogBase);
+    private JSonPickerDialog(@NonNull Builder builder) {
+        super(builder.P);
 
-        this.mProperties = properties.cloneProperties();
-        this.mSorter = createComparator(this.mProperties);
-    }
+        this.mContext = builder.P.context;
+        this.mSelectionType = builder.mSelectionType;
+        this.mTitleNodeName =
+                (builder.mTitleNodeName != null) ? builder.mTitleNodeName.toString() : "";
+        this.mSubTitleNodeName =
+                (builder.mSubTitleNodeName != null) ? builder.mSubTitleNodeName.toString() : "";
+        this.mChildrenNodeName =
+                (builder.mChildrenNodeName != null) ? builder.mChildrenNodeName.toString() : "";
+        this.mTitleMask = (builder.mTitleMask != null) ? builder.mTitleMask.toString() : "";
+        this.mSubTitleMask =
+                (builder.mSubTitleMask != null) ? builder.mSubTitleMask.toString() : "";
+        this.mBackItemTitle = builder.mBackItemTitle;
+        this.mRootNode = builder.mRootNode;
+        this.mSortBy = builder.mSortBy;
+        this.mSortOrder = builder.mSortOrder;
+        this.mOnSingleChoiceValidationListener = builder.mOnSingleChoiceValidationListener;
+        this.mOnMultiChoiceValidationListener = builder.mOnMultiChoiceValidationListener;
 
-    /**
-     * Object initialisation.
-     *
-     * @param context current context.
-     * @param properties picker properties.
-     * @param themeResId style resource id.
-     */
-    public JsonPickerDialog(
-            @NonNull Context context, @NonNull Properties properties, int themeResId) {
-        super(context, themeResId);
+        this.mTitleNodeNameDefined = (!TextUtils.isEmpty(this.mTitleNodeName));
+        this.mSubTitleNodeNameDefined = (!TextUtils.isEmpty(this.mSubTitleNodeName));
+        this.mChildrenNodeNameDefined = (!TextUtils.isEmpty(this.mChildrenNodeName));
 
-        this.mProperties = properties.cloneProperties();
-        this.mSorter = createComparator(this.mProperties);
+        this.mSorter = createComparator(this);
     }
 
     /**
@@ -250,66 +146,70 @@ public class JsonPickerDialog extends ListPickerDialogBase {
      *
      * @return A comparator object for sort list.
      */
-    private static Comparator<JSONItem> createComparator(final Properties properties) {
-        if (properties.sortOrder == JsonPickerDialog.SORT_ORDER_DISABLE) return null;
+    private static Comparator<JSONItem> createComparator(final JSonPickerDialog dialog) {
+        if (dialog.mSortOrder == JSonPickerDialog.SORT_ORDER_DISABLE) return null;
 
         final Comparator<JSONItem> comparator;
 
-        final int reversed =
-                ((properties.sortOrder == JsonPickerDialog.SORT_ORDER_REVERSE) ? -1 : 1);
-
-        if (properties.sortBy == JsonPickerDialog.SORT_BY_HAVE_CHILDREN) {
+        final int reversed = ((dialog.mSortOrder == JSonPickerDialog.SORT_ORDER_REVERSE) ? -1 : 1);
+        if (dialog.mSortBy == JSonPickerDialog.SORT_BY_HAVE_CHILDREN) {
             comparator =
                     new Comparator<JSONItem>() {
                         @Override
                         public int compare(JSONItem lht, JSONItem rht) {
                             try {
-                                boolean lhtHaveChildren =
-                                        (lht.object.has(properties.jsonChildrenNodeName)
-                                                && lht.object
-                                                                .getJSONArray(
-                                                                        properties
-                                                                                .jsonChildrenNodeName)
-                                                                .length()
-                                                        > 0);
+                                if (dialog.mChildrenNodeNameDefined) {
+                                    boolean lhtHaveChildren =
+                                            (lht.object.has(dialog.mChildrenNodeName)
+                                                    && lht.object
+                                                                    .getJSONArray(
+                                                                            dialog.mChildrenNodeName)
+                                                                    .length()
+                                                            > 0);
 
-                                boolean rhtHaveChildren =
-                                        (rht.object.has(properties.jsonChildrenNodeName)
-                                                && rht.object
-                                                                .getJSONArray(
-                                                                        properties
-                                                                                .jsonChildrenNodeName)
-                                                                .length()
-                                                        > 0);
+                                    boolean rhtHaveChildren =
+                                            (rht.object.has(dialog.mChildrenNodeName)
+                                                    && rht.object
+                                                                    .getJSONArray(
+                                                                            dialog.mChildrenNodeName)
+                                                                    .length()
+                                                            > 0);
 
-                                if (lhtHaveChildren && !rhtHaveChildren) return -1 * reversed;
-                                if (!lhtHaveChildren && rhtHaveChildren) return reversed;
+                                    if (lhtHaveChildren && !rhtHaveChildren) return -1 * reversed;
+                                    if (!lhtHaveChildren && rhtHaveChildren) return reversed;
+                                }
 
-                                String lhtTitle =
-                                        lht.object
-                                                .getString(properties.jsonTitleNodeName)
-                                                .toLowerCase();
-                                String rhtTitle =
-                                        rht.object
-                                                .getString(properties.jsonTitleNodeName)
-                                                .toLowerCase();
+                                if (dialog.mTitleNodeNameDefined) {
+                                    String lhtTitle =
+                                            (lht.object.has(dialog.mTitleNodeName)
+                                                    ? lht.object.getString(dialog.mTitleNodeName)
+                                                    : "");
+                                    String rhtTitle =
+                                            (rht.object.has(dialog.mTitleNodeName)
+                                                    ? rht.object.getString(dialog.mTitleNodeName)
+                                                    : "");
 
-                                if (!lhtTitle.equals(rhtTitle))
-                                    return lhtTitle.compareTo(rhtTitle) * reversed;
+                                    if (!lhtTitle.equals(rhtTitle))
+                                        return lhtTitle.compareToIgnoreCase(rhtTitle) * reversed;
+                                }
 
-                                String lhtSubTitle =
-                                        lht.object
-                                                .getString(properties.jsonSubTitleNodeName)
-                                                .toLowerCase();
-                                String rhtSubTitle =
-                                        rht.object
-                                                .getString(properties.jsonSubTitleNodeName)
-                                                .toLowerCase();
+                                if (dialog.mSubTitleNodeNameDefined) {
+                                    String lhtSubTitle =
+                                            (lht.object.has(dialog.mSubTitleNodeName)
+                                                    ? lht.object.getString(dialog.mSubTitleNodeName)
+                                                    : "");
+                                    String rhtSubTitle =
+                                            (rht.object.has(dialog.mSubTitleNodeName)
+                                                    ? rht.object.getString(dialog.mSubTitleNodeName)
+                                                    : "");
 
-                                return lhtSubTitle.compareTo(rhtSubTitle) * reversed;
+                                    if (!lhtSubTitle.equals(rhtSubTitle))
+                                        return lhtSubTitle.compareToIgnoreCase(rhtSubTitle)
+                                                * reversed;
+                                }
                             } catch (Exception Err) {
                                 Log.e(
-                                        "JsonPickerDialog.createComparator",
+                                        "JSonPickerDialog.createComparator",
                                         "Exception: " + Err.toString());
                             }
 
@@ -324,78 +224,114 @@ public class JsonPickerDialog extends ListPickerDialogBase {
                         @Override
                         public int compare(JSONItem lht, JSONItem rht) {
                             try {
-                                String lhtTitle =
-                                        lht.object
-                                                .getString(properties.jsonTitleNodeName)
-                                                .toLowerCase();
-                                String rhtTitle =
-                                        rht.object
-                                                .getString(properties.jsonTitleNodeName)
-                                                .toLowerCase();
+                                if (dialog.mTitleNodeNameDefined) {
+                                    String lhtTitle =
+                                            (lht.object.has(dialog.mTitleNodeName)
+                                                    ? lht.object.getString(dialog.mTitleNodeName)
+                                                    : "");
+                                    String rhtTitle =
+                                            (rht.object.has(dialog.mTitleNodeName)
+                                                    ? rht.object.getString(dialog.mTitleNodeName)
+                                                    : "");
 
-                                if (!lhtTitle.equals(rhtTitle))
-                                    return lhtTitle.compareTo(rhtTitle) * reversed;
+                                    if (!lhtTitle.equals(rhtTitle))
+                                        return lhtTitle.compareToIgnoreCase(rhtTitle) * reversed;
+                                }
 
-                                String lhtSubTitle =
-                                        lht.object
-                                                .getString(properties.jsonSubTitleNodeName)
-                                                .toLowerCase();
-                                String rhtSubTitle =
-                                        rht.object
-                                                .getString(properties.jsonSubTitleNodeName)
-                                                .toLowerCase();
+                                if (dialog.mSubTitleNodeNameDefined) {
+                                    String lhtSubTitle =
+                                            (lht.object.has(dialog.mSubTitleNodeName)
+                                                    ? lht.object.getString(dialog.mSubTitleNodeName)
+                                                    : "");
+                                    String rhtSubTitle =
+                                            (rht.object.has(dialog.mSubTitleNodeName)
+                                                    ? rht.object.getString(dialog.mSubTitleNodeName)
+                                                    : "");
 
-                                return lhtSubTitle.compareTo(rhtSubTitle) * reversed;
+                                    if (!lhtSubTitle.equals(rhtSubTitle))
+                                        return lhtSubTitle.compareToIgnoreCase(rhtSubTitle)
+                                                * reversed;
+                                }
                             } catch (Exception Err) {
                                 Log.e(
-                                        "JsonPickerDialog.createComparator",
+                                        "JSonPickerDialog.createComparator",
                                         "Exception: " + Err.toString());
                             }
 
                             return -1 * reversed;
+                            // --------------------------------------------------------------------------------------------------------------------------------
                         }
                     };
         }
-
         return comparator;
     }
 
     /* ---- Derived Methods ---- */
 
     /**
-     * Obtains an item the list of items corresponding to the children of the root item.
+     * Obtains an item used to create first item in list for return to parent item.
      *
-     * @param item Root element of the list to display.
-     * @return a collection of Item objet to load in list.
+     * @param item item of the list to display.
+     * @return a BackItem object to used to create first item in list for return to parent item.
      */
     @Override
-    protected Collection<Item> getChildrenFor(ItemBase item) {
-        ArrayList<Item> itemList = new ArrayList<>();
-
+    protected BackItem getBackItem(ItemBase item) {
         if (item != null) {
             Object itemTag = item.getTag();
 
             if (itemTag instanceof JSONItem) {
                 JSONItem jsonTag = (JSONItem) itemTag;
 
-                if (jsonTag.object.has(this.mProperties.jsonChildrenNodeName)) {
+                if (jsonTag.parent != null) {
+                    String backItemTitle =
+                            (TextUtils.isEmpty(this.mBackItemTitle))
+                                    ? this.mContext.getString(
+                                            R.string.json_picker_dialog_parent_directory_text)
+                                    : this.mBackItemTitle.toString();
+
+                    return new BackItem(
+                            this.mContext.getString(R.string.json_picker_dialog_parent_directory),
+                            backItemTitle,
+                            R.drawable.ic_json_picker_back,
+                            jsonTag.parent);
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Obtains an item the list of items corresponding to the children of the root item.
+     *
+     * @param item item of the list to display.
+     * @return a collection of PickerItem objects to load in list.
+     */
+    @Override
+    protected Collection<PickerItem> getChildrenFor(ItemBase item) {
+        ArrayList<PickerItem> itemList = new ArrayList<>();
+
+        if (item != null && this.mTitleNodeNameDefined && this.mChildrenNodeNameDefined) {
+            Object itemTag = item.getTag();
+
+            if (itemTag instanceof JSONItem) {
+                JSONItem jsonTag = (JSONItem) itemTag;
+
+                if (jsonTag.object.has(this.mChildrenNodeName)) {
                     try {
                         ArrayList<JSONItem> sortedObjects = new ArrayList<>();
 
-                        JSONArray children =
-                                jsonTag.object.getJSONArray(this.mProperties.jsonChildrenNodeName);
+                        JSONArray children = jsonTag.object.getJSONArray(this.mChildrenNodeName);
 
                         for (int index = 0; index < children.length(); index++) {
                             try {
                                 JSONObject jsonChild = children.getJSONObject(index);
 
-                                if (jsonChild.has(this.mProperties.jsonTitleNodeName)
-                                        && jsonChild.has(this.mProperties.jsonSubTitleNodeName)) {
+                                if (jsonChild.has(this.mTitleNodeName))
                                     sortedObjects.add(new JSONItem(jsonChild, jsonTag));
-                                }
                             } catch (Exception Err) {
                                 Log.e(
-                                        "JsonPickerDialog.getChildrenFor",
+                                        "JSonPickerDialog.getChildrenFor",
                                         "Exception: " + Err.toString());
                             }
                         }
@@ -403,16 +339,16 @@ public class JsonPickerDialog extends ListPickerDialogBase {
                         if (this.mSorter != null) Collections.sort(sortedObjects, this.mSorter);
 
                         for (JSONItem newObject : sortedObjects) {
-                            Item newItem = this.createItem(newObject);
+                            PickerItem newItem = this.createItem(newObject);
 
                             if (newItem != null) itemList.add(newItem);
                         }
                     } catch (Exception Err) {
-                        Log.e("JsonPickerDialog.getChildrenFor", "Exception: " + Err.toString());
+                        Log.e("JSonPickerDialog.getChildrenFor", "Exception: " + Err.toString());
                     }
                 } else {
                     Toast.makeText(
-                                    this.getContext(),
+                                    this.mContext,
                                     R.string.json_picker_dialog_error_dir_access,
                                     Toast.LENGTH_SHORT)
                             .show();
@@ -424,33 +360,65 @@ public class JsonPickerDialog extends ListPickerDialogBase {
     }
 
     /**
-     * Obtains an item to display dialog header.
+     * Obtains an item used to initialize the selector.
      *
-     * @param item Root element of the list to display.
-     * @return a ItemBase objet to define title, sub-title and icon of dialog header.
+     * @return a ItemBase object to used to initialize the selector.
      */
     @Override
-    protected ItemBase getHeaderItem(ItemBase item) {
-        if (item != null) {
+    protected ItemBase getRootItem() {
+        if (this.mRootNode != null && this.mTitleNodeNameDefined && this.mChildrenNodeNameDefined) {
+            if (this.mRootNode.has(this.mTitleNodeName)
+                    && this.mRootNode.has(this.mChildrenNodeName)) {
+                return this.createItem(new JSONItem(this.mRootNode, null));
+            }
+        }
+
+        Toast.makeText(
+                        this.mContext,
+                        R.string.json_picker_dialog_error_dir_access,
+                        Toast.LENGTH_SHORT)
+                .show();
+
+        return null;
+    }
+
+    /**
+     * Obtains an item to display dialog header.
+     *
+     * @param item item of the list to display.
+     * @return a ItemBase object to define title, sub-title and icon of dialog header.
+     */
+    @Override
+    protected ItemBase getTitleItem(ItemBase item) {
+        if (item != null && this.mTitleNodeNameDefined) {
             Object itemTag = item.getTag();
 
             if (itemTag instanceof JSONItem) {
+                JSONItem jsonTag = (JSONItem) itemTag;
+
                 try {
-                    String tTitle =
-                            ((JSONItem) itemTag)
-                                    .object.getString(this.mProperties.jsonTitleNodeName);
+                    String tTitle = jsonTag.object.getString(this.mTitleNodeName);
 
                     StringBuilder subTitle = new StringBuilder();
 
                     JSONItem parent = ((JSONItem) itemTag);
 
                     while (parent != null) {
-                        if (parent.parent != null)
-                            subTitle.insert(
-                                    0,
-                                    "/"
-                                            + parent.object.getString(
-                                                    this.mProperties.jsonSubTitleNodeName));
+                        if (parent.parent != null) {
+                            if (this.mSubTitleNodeNameDefined) {
+                                if (parent.object.has(this.mSubTitleNodeName)) {
+                                    subTitle.insert(
+                                            0,
+                                            "/" + parent.object.getString(this.mSubTitleNodeName));
+                                } else {
+                                    subTitle.insert(
+                                            0, "/" + parent.object.getString(this.mTitleNodeName));
+                                }
+                            } else {
+                                subTitle.insert(
+                                        0, "/" + parent.object.getString(this.mTitleNodeName));
+                            }
+                        }
 
                         parent = parent.parent;
                     }
@@ -460,60 +428,10 @@ public class JsonPickerDialog extends ListPickerDialogBase {
                     return new ItemBase(
                             tTitle, subTitle.toString(), R.drawable.ic_json_picker_header);
                 } catch (Exception Err) {
-                    Log.e("JsonPickerDialog.getHeaderItem", "Exception: " + Err.toString());
+                    Log.e("JSonPickerDialog.getTitleItem", "Exception: " + Err.toString());
                 }
             }
         }
-
-        return null;
-    }
-
-    /**
-     * Obtains an item used to create first item in list for return to parent item.
-     *
-     * @return a ItemBase objet to used to create first item in list for return to parent item.
-     */
-    @Override
-    protected BackItem getBackItem(ItemBase item) {
-        if (item != null) {
-            Object itemTag = item.getTag();
-
-            if (itemTag instanceof JSONItem) {
-                JSONItem jsonTag = (JSONItem) itemTag;
-
-                if (jsonTag.parent != null)
-                    return new BackItem(
-                            super.getContext()
-                                    .getString(R.string.json_picker_dialog_parent_directory),
-                            super.getContext()
-                                    .getString(R.string.json_picker_dialog_parent_directory_text),
-                            R.drawable.ic_json_picker_back,
-                            jsonTag.parent);
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Obtains an item used to initialize the selector.
-     *
-     * @return a ItemBase objet to used to initialize the selector.
-     */
-    @Override
-    protected ItemBase getRootItem() {
-        if (this.mProperties.root != null) {
-            if (this.mProperties.root.has(this.mProperties.jsonTitleNodeName)
-                    && this.mProperties.root.has(this.mProperties.jsonSubTitleNodeName)) {
-                return this.createItem(new JSONItem(this.mProperties.root, null));
-            }
-        }
-
-        Toast.makeText(
-                        this.getContext(),
-                        R.string.json_picker_dialog_error_dir_access,
-                        Toast.LENGTH_SHORT)
-                .show();
 
         return null;
     }
@@ -524,8 +442,8 @@ public class JsonPickerDialog extends ListPickerDialogBase {
      * @return a boolean value who indicates if the picker is in multiple selection mode.
      */
     @Override
-    protected boolean isMultiSelectMode() {
-        return (this.mProperties.selectionMode == JsonPickerDialog.MULTI_MODE);
+    protected boolean isMultiSelectionMode() {
+        return (this.mOnMultiChoiceValidationListener != null);
     }
 
     /**
@@ -535,7 +453,7 @@ public class JsonPickerDialog extends ListPickerDialogBase {
      */
     @Override
     protected void onValidateSelection(Collection<PickableItem> items) {
-        if (this.mListener != null) {
+        if (items.size() > 0) {
             ArrayList<JSONObject> result = new ArrayList<>();
 
             for (PickableItem item : items) {
@@ -546,7 +464,12 @@ public class JsonPickerDialog extends ListPickerDialogBase {
                 }
             }
 
-            this.mListener.onValidateSelection(result.toArray(new JSONObject[0]));
+            if (this.mOnSingleChoiceValidationListener != null)
+                this.mOnSingleChoiceValidationListener.onClick(this, result.get(0));
+
+            if (this.mOnMultiChoiceValidationListener != null)
+                this.mOnMultiChoiceValidationListener.onClick(
+                        this, result.toArray(new JSONObject[0]));
         }
     }
 
@@ -558,64 +481,382 @@ public class JsonPickerDialog extends ListPickerDialogBase {
      * @param jsonItem a json object.
      * @return a picker item corresponding to the specified file.
      */
-    private Item createItem(JSONItem jsonItem) {
-        try {
-            String title = jsonItem.object.getString(this.mProperties.jsonTitleNodeName);
-            String subTitle = jsonItem.object.getString(this.mProperties.jsonSubTitleNodeName);
+    private PickerItem createItem(@NonNull JSONItem jsonItem) {
+        if (this.mTitleNodeNameDefined) {
+            try {
+                String title = jsonItem.object.getString(this.mTitleNodeName);
 
-            if (this.mProperties.titleMask != null && this.mProperties.titleMask.contains("%s"))
-                title = String.format(DEF_LOCAL, this.mProperties.titleMask, title);
+                if (!TextUtils.isEmpty(this.mTitleMask) && this.mTitleMask.contains("%s"))
+                    title = String.format(DEF_LOCAL, this.mTitleMask, title);
 
-            if (this.mProperties.subTitleMask != null
-                    && this.mProperties.subTitleMask.contains("%s"))
-                subTitle = String.format(DEF_LOCAL, this.mProperties.subTitleMask, subTitle);
+                String subTitle = "";
 
-            boolean hasChildren = false;
+                if (this.mSubTitleNodeNameDefined) {
+                    if (jsonItem.object.has(this.mSubTitleNodeName)) {
+                        subTitle = jsonItem.object.getString(this.mSubTitleNodeName);
 
-            if (jsonItem.object.has(this.mProperties.jsonChildrenNodeName)) {
-                try {
-                    JSONArray jsonArray =
-                            jsonItem.object.getJSONArray(this.mProperties.jsonChildrenNodeName);
-
-                    hasChildren = (jsonArray.length() > 0);
-                } catch (Exception Err) {
-                    Log.e("JsonPickerDialog.createItem", "Exception: " + Err.toString());
+                        if (!TextUtils.isEmpty(this.mSubTitleMask)
+                                && this.mSubTitleMask.contains("%s"))
+                            subTitle = String.format(DEF_LOCAL, this.mSubTitleMask, subTitle);
+                    }
                 }
-            }
 
-            if (hasChildren) {
-                if (this.mProperties.selectionType == JsonPickerDialog.ALL_NODE_SELECT)
+                boolean hasChildren = false;
+
+                if (this.mChildrenNodeNameDefined) {
+                    if (jsonItem.object.has(this.mChildrenNodeName)) {
+                        try {
+                            JSONArray jsonArray =
+                                    jsonItem.object.getJSONArray(this.mChildrenNodeName);
+
+                            hasChildren = (jsonArray.length() > 0);
+                        } catch (Exception Err) {
+                            Log.e("JSonPickerDialog.createItem", "Exception: " + Err.toString());
+                        }
+                    }
+
+                    if (hasChildren) {
+                        if (this.mSelectionType == JSonPickerDialog.ALL_NODE_SELECT)
+                            return new PickableItem(
+                                    title,
+                                    subTitle,
+                                    R.drawable.ic_json_picker_node_has_children,
+                                    jsonItem,
+                                    true);
+                        else
+                            return new PickerItem(
+                                    title,
+                                    subTitle,
+                                    R.drawable.ic_json_picker_node_has_children,
+                                    jsonItem,
+                                    true);
+                    } else {
+                        return new PickableItem(
+                                title,
+                                subTitle,
+                                R.drawable.ic_json_picker_single_node,
+                                jsonItem,
+                                false);
+                    }
+                } else {
                     return new PickableItem(
                             title,
                             subTitle,
-                            R.drawable.ic_json_picker_node_has_children,
+                            R.drawable.ic_json_picker_single_node,
                             jsonItem,
-                            true);
-                else
-                    return new Item(
-                            title,
-                            subTitle,
-                            R.drawable.ic_json_picker_node_has_children,
-                            jsonItem,
-                            true);
-            } else
-                return new PickableItem(
-                        title, subTitle, R.drawable.ic_json_picker_single_node, jsonItem, false);
-        } catch (Exception Err) {
-            Log.e("JsonPickerDialog.createItem", "Exception: " + Err.toString());
+                            false);
+                }
+            } catch (Exception Err) {
+                Log.e("JSonPickerDialog.createItem", "Exception: " + Err.toString());
+            }
         }
-
         return null;
     }
 
-    /* ---- Public Methods ---- */
+    /** Provide a builder for a json picker dialog. */
+    @SuppressWarnings("UnusedReturnValue")
+    public static class Builder {
+        // Attributes
+        private final PickerParams P;
+        private int mSelectionType = JSonPickerDialog.ALL_NODE_SELECT;
+        private CharSequence mTitleNodeName;
+        private CharSequence mSubTitleNodeName;
+        private CharSequence mChildrenNodeName;
+        private CharSequence mTitleMask;
+        private CharSequence mSubTitleMask;
+        private CharSequence mBackItemTitle;
+        private JSONObject mRootNode;
+        private int mSortBy = JSonPickerDialog.SORT_BY_TITLE;
+        private int mSortOrder = JSonPickerDialog.SORT_ORDER_DISABLE;
+        private OnSingleChoiceValidationListener<JSONObject> mOnSingleChoiceValidationListener;
+        private OnMultiChoiceValidationListener<JSONObject> mOnMultiChoiceValidationListener;
 
-    /**
-     * Allows you to be informed when validating the json nodes selection.
-     *
-     * @param listener listener.
-     */
-    public void setValidateSelectionListener(ValidateSelectionListener listener) {
-        this.mListener = listener;
+        /**
+         * Creates a builder for a json picker dialog that uses the default dialog dialog theme.
+         *
+         * @param context the parent context
+         */
+        public Builder(@NonNull Context context) {
+            this(context, R.style.ListPickerDialogBase);
+        }
+
+        /**
+         * Creates a builder for a json picker dialog that uses an explicit theme resource.
+         *
+         * @param context the parent context
+         * @param themeResId the resource ID of the theme against which to inflate this dialog, or
+         *     {@code 0} to use the parent {@code context}'s default dialog dialog theme
+         */
+        public Builder(@NonNull Context context, @StyleRes int themeResId) {
+            this.P = new PickerParams(context, themeResId);
+
+            this.P.iconId = R.drawable.ic_file_picker_header;
+        }
+
+        /* Base List Picker Properties */
+
+        /**
+         * Set the resource id of the {@link Drawable} to be used in the title.
+         *
+         * @return this builder object to allow for chaining of calls to set methods
+         */
+        public Builder setIcon(@DrawableRes int iconId) {
+            this.P.iconId = iconId;
+            return this;
+        }
+
+        /**
+         * Set the title using the given resource id.
+         *
+         * @return this builder object to allow for chaining of calls to set methods
+         */
+        public Builder setTitle(@StringRes int titleId) {
+            this.P.title = this.P.context.getText(titleId);
+            return this;
+        }
+
+        /**
+         * Set the title displayed in the.
+         *
+         * @return this builder object to allow for chaining of calls to set methods
+         */
+        public Builder setTitle(@Nullable CharSequence title) {
+            this.P.title = title;
+            return this;
+        }
+
+        /**
+         * Set a listener to be invoked when the positive button of the dialog is pressed.
+         *
+         * @param textId The resource id of the text to display in the positive button
+         * @return this builder object to allow for chaining of calls to set methods
+         */
+        public Builder setPositiveButton(@StringRes int textId) {
+            this.P.positiveButtonText = this.P.context.getText(textId);
+            return this;
+        }
+
+        /**
+         * Set a listener to be invoked when the positive button of the dialog is pressed.
+         *
+         * @param text The text to display in the positive button
+         * @return this builder object to allow for chaining of calls to set methods
+         */
+        public Builder setPositiveButton(CharSequence text) {
+            this.P.positiveButtonText = text;
+            return this;
+        }
+
+        /**
+         * Set a listener to be invoked when the positive button of the dialog is pressed.
+         *
+         * @return this builder object to allow for chaining of calls to set methods
+         */
+        public Builder setPositiveButtonListener(OnClickListener listener) {
+            this.P.positiveButtonListener = listener;
+            return this;
+        }
+
+        /**
+         * Set a listener to be invoked when the negative button of the dialog is pressed.
+         *
+         * @param textId The resource id of the text to display in the negative button
+         * @return this builder object to allow for chaining of calls to set methods
+         */
+        public Builder setNegativeButton(@StringRes int textId) {
+            this.P.negativeButtonText = this.P.context.getText(textId);
+            return this;
+        }
+
+        /**
+         * Set a listener to be invoked when the negative button of the dialog is pressed.
+         *
+         * @param text The text to display in the negative button
+         * @return this builder object to allow for chaining of calls to set methods
+         */
+        public Builder setNegativeButton(CharSequence text) {
+            this.P.negativeButtonText = text;
+            return this;
+        }
+
+        /**
+         * Set a listener to be invoked when the negative button of the dialog is pressed.
+         *
+         * @return this builder object to allow for chaining of calls to set methods
+         */
+        public Builder setNegativeButtonListener(OnClickListener listener) {
+            this.P.negativeButtonListener = listener;
+            return this;
+        }
+
+        /**
+         * Sets whether the dialog is cancelable or not. Default is true.
+         *
+         * @return this builder object to allow for chaining of calls to set methods
+         */
+        public Builder setCancelable(boolean cancelable) {
+            this.P.cancelable = cancelable;
+            return this;
+        }
+
+        /**
+         * Sets the callback that will be called if the dialog is canceled.
+         *
+         * @return this builder object to allow for chaining of calls to set methods
+         */
+        public Builder setOnCancelListener(OnCancelListener onCancelListener) {
+            this.P.onCancelListener = onCancelListener;
+            return this;
+        }
+
+        /* Json Picker Properties */
+
+        /**
+         * Sets selection Type defines that whether a json nodes or both of these has to be
+         * selected. Default value is ALL_NODE_SELECT.
+         *
+         * <p>ALL_NODE_SELECT, NODE_WITHOUT_CHILD_SELECT are the two selection types.
+         *
+         * @return this builder object to allow for chaining of calls to set methods
+         */
+        public Builder setSelectionType(int selectionType) {
+            this.mSelectionType = selectionType;
+            return this;
+        }
+
+        /**
+         * Sets name of json node contains title item.
+         *
+         * @return this builder object to allow for chaining of calls to set methods
+         */
+        public Builder setTitleNodeName(@NonNull CharSequence titleNodeName) {
+            this.mTitleNodeName = titleNodeName;
+            return this;
+        }
+
+        /**
+         * Sets name of json node contains sub-title item.
+         *
+         * @return this builder object to allow for chaining of calls to set methods
+         */
+        public Builder setSubTitleNodeName(@Nullable CharSequence subTitleNodeName) {
+            this.mSubTitleNodeName = subTitleNodeName;
+            return this;
+        }
+
+        /**
+         * Sets name of json node contains child nodes.
+         *
+         * @return this builder object to allow for chaining of calls to set methods
+         */
+        public Builder setChildrenNodeName(@NonNull CharSequence childrenNodeName) {
+            this.mChildrenNodeName = childrenNodeName;
+            return this;
+        }
+
+        /**
+         * Sets title item mask. Must contain one and only one '%s'.
+         *
+         * @return this builder object to allow for chaining of calls to set methods
+         */
+        public Builder setTitleMask(CharSequence titleMask) {
+            this.mTitleMask = titleMask;
+            return this;
+        }
+
+        /**
+         * Sets sub-title item mask. Must contain one and only one '%s'.
+         *
+         * @return this builder object to allow for chaining of calls to set methods
+         */
+        public Builder setSubTitleMask(CharSequence subTitleMask) {
+            this.mSubTitleMask = subTitleMask;
+            return this;
+        }
+
+        /**
+         * Sets sub-title back item.
+         *
+         * @return this builder object to allow for chaining of calls to set methods
+         */
+        public Builder setBackItemTitle(CharSequence backItemTitle) {
+            this.mBackItemTitle = backItemTitle;
+            return this;
+        }
+
+        /**
+         * Sets root json node. List of json nodes are populated from here.
+         *
+         * @return this builder object to allow for chaining of calls to set methods
+         */
+        public Builder setRootNode(@NonNull JSONObject rootNode) {
+            this.mRootNode = rootNode;
+            return this;
+        }
+
+        /**
+         * Sort by defines the sort order of the items. Default value is SORT_BY_TITLE.
+         *
+         * <p>SORT_BY_TITLE, SORT_BY_HAVE_CHILDREN are the two sort by.
+         *
+         * @return this builder object to allow for chaining of calls to set methods
+         */
+        public Builder setSortBy(int sortBy) {
+            this.mSortBy = sortBy;
+            return this;
+        }
+
+        /**
+         * Sort order defines the sort direction of the items. Default value is SORT_ORDER_DISABLE.
+         *
+         * <p>SORT_ORDER_DISABLE, SORT_ORDER_NORMAL, SORT_ORDER_REVERSE are the three sort orders.
+         *
+         * @return this builder object to allow for chaining of calls to set methods
+         */
+        public Builder setSortOrder(int sortOrder) {
+            this.mSortOrder = sortOrder;
+            return this;
+        }
+
+        /**
+         * Sets the callback that will be called if the dialog is validated (single selection mode).
+         *
+         * @return this builder object to allow for chaining of calls to set methods
+         */
+        public Builder setOnSingleChoiceValidationListener(
+                OnSingleChoiceValidationListener<JSONObject> listener) {
+            this.mOnSingleChoiceValidationListener = listener;
+
+            return this;
+        }
+
+        /**
+         * Sets the callback that will be called if the dialog is validated (multiple selection
+         * mode).
+         *
+         * @return this builder object to allow for chaining of calls to set methods
+         */
+        public Builder setOnMultiChoiceValidationListener(
+                OnMultiChoiceValidationListener<JSONObject> listener) {
+            this.mOnMultiChoiceValidationListener = listener;
+
+            return this;
+        }
+
+        /**
+         * Creates an {@link JSonPickerDialog} with the arguments supplied to this builder and
+         * immediately displays the dialog.
+         *
+         * <p>Calling this method is functionally identical to:
+         *
+         * @return a FilePickerDialog dialog.
+         */
+        public JSonPickerDialog show() {
+            final JSonPickerDialog dialog = new JSonPickerDialog(this);
+
+            dialog.show();
+
+            return dialog;
+        }
     }
 }

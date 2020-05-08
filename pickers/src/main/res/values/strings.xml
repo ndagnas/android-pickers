@@ -24,8 +24,8 @@
    <!-- layout / list_picker_dialog_base -->
 
    <string name="list_picker_dialog_base_no_text">&#8230;</string>
-   <string name="list_picker_dialog_base_cancel_button">Cancel</string>
-   <string name="list_picker_dialog_base_select_button">Select</string>
+   <string name="list_picker_dialog_base_negative_button">Cancel</string>
+   <string name="list_picker_dialog_base_positive_button">Select</string>
 
    <!-- layout / list_picker_dialog_base_item -->
 

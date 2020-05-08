@@ -17,7 +17,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- *    Created by Nicolas Dagnas on 01-05-2020.
+ *    Created by Nicolas Dagnas on 01-05-2020, updated on 08-05-2020.
  *
  */
 
@@ -28,6 +28,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -35,7 +36,11 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
+import androidx.annotation.StyleRes;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -43,6 +48,7 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -52,37 +58,7 @@ import java.util.regex.Pattern;
 
 /** Defines a file picker dialog. */
 @SuppressWarnings({"unused", "WeakerAccess"})
-public class FilePickerDialog extends ListPickerDialogBase {
-    private static java.util.Locale DEF_LOCAL = java.util.Locale.getDefault();
-
-    /** Defines constant to check for external read permission. */
-    public static final int EXTERNAL_READ_PERMISSION_GRANT = 1;
-
-    /** Defines a listener to be informed of the validation of the selection. */
-    public interface ValidateSelectionListener {
-        /**
-         * Called on dialog validation.
-         *
-         * @param files list of selected files/directories.
-         */
-        void onValidateSelection(String[] files);
-    }
-
-    // SELECTION_MODES
-
-    /**
-     * SINGLE_MODE specifies that a single File/Directory has to be selected from the list of
-     * Files/Directories. It is the default Selection Mode.
-     */
-    public static final int SINGLE_MODE = 0;
-
-    /**
-     * MULTI_MODE specifies that multiple Files/Directories has to be selected from the list of
-     * Files/Directories.
-     */
-    public static final int MULTI_MODE = 1;
-
-    // SELECTION_TYPES
+public class FilePickerDialog extends ListPickerDialogBase implements PickerInterface {
 
     /**
      * FILE_SELECT specifies that from list of Files/Directories a File has to be selected. It is
@@ -122,153 +98,18 @@ public class FilePickerDialog extends ListPickerDialogBase {
     /** SORT_ORDER_NORMAL specifies that list of Files/Directories is sorted by reverse order. */
     public static final int SORT_ORDER_REVERSE = 1;
 
-    /**
-     * Descriptor class to define properties of the Dialog. Actions are performed upon these
-     * Properties.
-     */
-    @SuppressWarnings("WeakerAccess")
-    public static class Properties {
-        /** Object initialisation. */
-        public Properties() {
-            this.selectionMode = FilePickerDialog.SINGLE_MODE;
-            this.selectionType = FilePickerDialog.FILE_SELECT;
-
-            this.root = new File(FilePickerDialog.DEFAULT_DIR);
-            this.errorDir = new File(FilePickerDialog.DEFAULT_DIR);
-            this.offsetDir = new File(FilePickerDialog.DEFAULT_DIR);
-
-            this.patterns = null;
-
-            this.sortBy = FilePickerDialog.SORT_BY_NAME;
-            this.sortOrder = FilePickerDialog.SORT_ORDER_NORMAL;
-
-            this.showToolbar = true;
-        }
-
-        /**
-         * Clone current object.
-         *
-         * @return a Properties object.
-         */
-        Properties cloneProperties() {
-            Properties result = new Properties();
-
-            result.selectionMode = this.selectionMode;
-            result.selectionType = this.selectionType;
-            result.root = this.root;
-            result.errorDir = this.errorDir;
-            result.offsetDir = this.offsetDir;
-            result.patterns = this.patterns;
-            result.sortBy = this.sortBy;
-            result.sortOrder = this.sortOrder;
-            result.showToolbar = this.showToolbar;
-
-            return result;
-        }
-
-        /**
-         * Selection Mode defines whether a single of multiple Files/Directories have to be
-         * selected.
-         *
-         * <p>SINGLE_MODE and MULTI_MODE are the two selection modes.
-         *
-         * <p>Set to SINGLE_MODE as default value by constructor.
-         */
-        public int selectionMode;
-
-        /**
-         * Selection Type defines that whether a File/Directory or both of these has to be selected.
-         *
-         * <p>FILE_SELECT, DIR_SELECT, FILE_AND_DIR_SELECT are the three selection types.
-         *
-         * <p>Set to FILE_SELECT as default value by constructor.
-         */
-        public int selectionType;
-
-        /**
-         * The Parent/Root Directory. List of Files are populated from here. Can be set to any
-         * readable directory. /sdcard is the default location.
-         *
-         * <p>EX. /sdcard
-         *
-         * <p>Ex. /mnt
-         */
-        public File root;
-
-        /**
-         * The Directory is used when Root Directory is not readable or accessible. /sdcard is the
-         * default location.
-         *
-         * <p>Ex. /sdcard
-         *
-         * <p>Ex. /mnt
-         */
-        public File errorDir;
-
-        /**
-         * The Directory can be used as an offset. It is the first directory that is shown in
-         * dialog. Consider making it Root's sub-directory.
-         *
-         * <p>Ex. Root: /sdcard
-         *
-         * <p>Ex. Offset: /sdcard/Music/Country
-         */
-        public File offsetDir;
-
-        /**
-         * An Array of String containing patterns, Files with only that will be shown. Others will
-         * be ignored. Set to null as default value by constructor.
-         *
-         * <p>Ex. String ext={"*.jpg","*.jpeg","file*.png","pictures*-*.gif"};
-         */
-        public String[] patterns;
-
-        /**
-         * Sort by defines the sort order of the items.
-         *
-         * <p>SORT_BY_NAME, SORT_BY_LAST_MODIFIED, SORT_BY_SIZE are the three sort by.
-         *
-         * <p>Set to SORT_BY_NAME as default value by constructor.
-         */
-        public int sortBy;
-
-        /**
-         * Sort order defines the sort direction of the items.
-         *
-         * <p>SORT_ORDER_NORMAL, SORT_ORDER_REVERSE are the two sort orders.
-         *
-         * <p>Set to SORT_ORDER_NORMAL as default value by constructor.
-         */
-        public int sortOrder;
-
-        /** indicates whether to display the toolbar used to manage sorting. */
-        public boolean showToolbar;
-    }
-
     /** Class to filter the list of files. */
     static class ExtensionFilter implements FileFilter {
-        private final FilePickerDialog mOwner;
-        private final Properties mProperties;
-        private final Pattern[] mValidPatterns;
+        // Attributes
+        private final FilePickerDialog mDialog;
 
         /**
          * Object initialisation.
          *
-         * @param owner owner of this object.
-         * @param properties picker dialog properties.
+         * @param dialog owner of this object.
          */
-        ExtensionFilter(@NonNull FilePickerDialog owner, @NonNull Properties properties) {
-            this.mOwner = owner;
-            this.mProperties = properties;
-
-            if (properties.patterns != null && properties.patterns.length > 0) {
-                this.mValidPatterns = new Pattern[properties.patterns.length];
-
-                for (int Index = 0; Index < this.mValidPatterns.length; Index++)
-                    this.mValidPatterns[Index] = Pattern.compile(properties.patterns[Index]);
-            } else {
-                this.mValidPatterns = null;
-            }
+        ExtensionFilter(@NonNull FilePickerDialog dialog) {
+            this.mDialog = dialog;
         }
 
         /**
@@ -283,20 +124,19 @@ public class FilePickerDialog extends ListPickerDialogBase {
             if (File.isDirectory() && File.canRead()) return true;
 
             // True for files, If the selection type is Directory type, ie.
-            //
             // Only directory has to be selected from the list, then all files are ignored.
 
-            if (this.mProperties.selectionType == FilePickerDialog.DIR_SELECT) return false;
+            if (this.mDialog.mSelectionType == FilePickerDialog.DIR_SELECT) return false;
 
             // Validate if no filter
 
-            if (this.mValidPatterns == null) return true;
+            if (this.mDialog.mPatterns == null || this.mDialog.mPatterns.length == 0) return true;
 
             // Check whether name of the file ends with the extension. Added if it does.
 
             String fileName = File.getName().toLowerCase(Locale.getDefault());
 
-            for (Pattern pattern : this.mValidPatterns) {
+            for (Pattern pattern : this.mDialog.mPatterns) {
                 if (pattern.matcher(fileName).matches()) return true;
             }
 
@@ -304,47 +144,53 @@ public class FilePickerDialog extends ListPickerDialogBase {
         }
     }
 
+    private static java.util.Locale DEF_LOCAL = java.util.Locale.getDefault();
+
+    // Attributes
+
     private final Context mContext;
-    private final Properties mProperties;
+    private final int mRequestCode;
+    private final int mSelectionType;
+    private final File mRootDir;
+    private final File mErrorDir;
+    private final File mOffsetDir;
+    private final Pattern[] mPatterns;
+    private int mSortBy;
+    private int mSortOrder;
+    private final boolean mToolbarIsVisible;
+    private final OnSingleChoiceValidationListener<String> mOnSingleChoiceValidationListener;
+    private final OnMultiChoiceValidationListener<String> mOnMultiChoiceValidationListener;
     private final ExtensionFilter mFilter;
     private Comparator<File> mSorter;
-    private ValidateSelectionListener mListener;
-    private LinearLayout mToolbar = null;
+    private LinearLayout mToolbarView = null;
     private TextView mNameColumn = null;
     private TextView mDateColumn = null;
     private TextView mSizeColumn = null;
     private static DecimalFormat mSizeDecimalFormat;
 
     /**
-     * Object initialisation.
+     * Create a file picker dialog.
      *
-     * @param context current context.
-     * @param properties picker properties.
+     * @param builder a builder object contains dialog parameters.
      */
-    public FilePickerDialog(@NonNull Context context, @NonNull Properties properties) {
-        super(context, R.style.ListPickerDialogBase);
+    private FilePickerDialog(@NonNull Builder builder) {
+        super(builder.P);
 
-        this.mContext = context;
-        this.mProperties = properties.cloneProperties();
-        this.mFilter = new ExtensionFilter(this, this.mProperties);
-        this.mSorter = createComparator(this.mProperties);
-    }
+        this.mContext = builder.P.context;
+        this.mRequestCode = builder.mRequestCode;
+        this.mSelectionType = builder.mSelectionType;
+        this.mRootDir = builder.mRootDir;
+        this.mErrorDir = builder.mErrorDir;
+        this.mOffsetDir = builder.mOffsetDir;
+        this.mPatterns = builder.mPatterns;
+        this.mSortBy = builder.mSortBy;
+        this.mSortOrder = builder.mSortOrder;
+        this.mToolbarIsVisible = builder.mToolbarIsVisible;
+        this.mOnSingleChoiceValidationListener = builder.mOnSingleChoiceValidationListener;
+        this.mOnMultiChoiceValidationListener = builder.mOnMultiChoiceValidationListener;
 
-    /**
-     * Object initialisation.
-     *
-     * @param context current context.
-     * @param properties picker properties.
-     * @param themeResId style resource id.
-     */
-    public FilePickerDialog(
-            @NonNull Context context, @NonNull Properties properties, int themeResId) {
-        super(context, themeResId);
-
-        this.mContext = context;
-        this.mProperties = properties.cloneProperties();
-        this.mFilter = new ExtensionFilter(this, this.mProperties);
-        this.mSorter = createComparator(this.mProperties);
+        this.mFilter = new ExtensionFilter(this);
+        this.mSorter = createComparator(this);
     }
 
     /* ---- Derived Methods ---- */
@@ -352,11 +198,13 @@ public class FilePickerDialog extends ListPickerDialogBase {
     /** Called on dialog show. */
     @Override
     public void show() {
-        if (!this.checkStorageAccessPermissions() && this.mContext instanceof Activity) {
+        if (!this.checkStorageAccessPermissions()
+                && this.mContext instanceof Activity
+                && this.mRequestCode != 0) {
             ((Activity) this.mContext)
                     .requestPermissions(
                             new String[] {Manifest.permission.READ_EXTERNAL_STORAGE},
-                            EXTERNAL_READ_PERMISSION_GRANT);
+                            this.mRequestCode);
         } else {
             super.show();
         }
@@ -372,23 +220,21 @@ public class FilePickerDialog extends ListPickerDialogBase {
      * @return a boolean value notifying whether the permission is granted or not.
      */
     private boolean checkStorageAccessPermissions() {
-        return (super.getContext()
-                        .checkCallingOrSelfPermission("android.permission.READ_EXTERNAL_STORAGE")
+        return (this.mContext.checkCallingOrSelfPermission(
+                        "android.permission.READ_EXTERNAL_STORAGE")
                 == PackageManager.PERMISSION_GRANTED);
     }
-
     /**
      * Create comparator for sort objects in list.
      *
      * @return A comparator object for sort list.
      */
-    private static Comparator<File> createComparator(Properties properties) {
+    private static Comparator<File> createComparator(FilePickerDialog dialog) {
         final Comparator<File> comparator;
 
-        final int reversed =
-                ((properties.sortOrder == FilePickerDialog.SORT_ORDER_REVERSE) ? -1 : 1);
+        final int reversed = ((dialog.mSortOrder == FilePickerDialog.SORT_ORDER_REVERSE) ? -1 : 1);
 
-        switch (properties.sortBy) {
+        switch (dialog.mSortBy) {
             case FilePickerDialog.SORT_BY_LAST_MODIFIED:
                 {
                     comparator =
@@ -399,21 +245,31 @@ public class FilePickerDialog extends ListPickerDialogBase {
                                         if (lht.getName().equals("...")) return -1 * reversed;
                                         if (rht.getName().equals("...")) return reversed;
 
-                                        return -Long.compare(lht.lastModified(), rht.lastModified())
+                                        return Long.compare(lht.lastModified(), rht.lastModified())
                                                 * reversed;
                                     }
 
                                     // If the comparison is not between two directories, return the
                                     // file with alphabetic order first.
 
-                                    if (!rht.isDirectory() && !lht.isDirectory())
-                                        return -Long.compare(lht.lastModified(), rht.lastModified())
-                                                * reversed;
+                                    if (!rht.isDirectory() && !lht.isDirectory()) {
+                                        int result =
+                                                Long.compare(lht.lastModified(), rht.lastModified())
+                                                        * reversed;
+
+                                        if (result == 0)
+                                            return lht.getName().compareToIgnoreCase(rht.getName())
+                                                    * reversed;
+
+                                        return result;
+                                    }
 
                                     // If the comparison is between a directory and a file, return
                                     // the directory.
 
-                                    if (rht.isDirectory() && !lht.isDirectory()) return reversed;
+                                    if (lht.isDirectory() && !rht.isDirectory())
+                                        return -1 * reversed;
+                                    if (!lht.isDirectory() && rht.isDirectory()) return reversed;
 
                                     // Same as above but order of occurrence is different.
 
@@ -427,28 +283,37 @@ public class FilePickerDialog extends ListPickerDialogBase {
                 {
                     comparator =
                             new Comparator<File>() {
+                                @SuppressWarnings("DuplicateExpressions")
                                 @Override
                                 public int compare(File lht, File rht) {
                                     if (rht.isDirectory() && lht.isDirectory()) {
                                         if (lht.getName().equals("...")) return -1 * reversed;
                                         if (rht.getName().equals("...")) return reversed;
 
-                                        return lht.getName()
-                                                        .toLowerCase()
-                                                        .compareTo(rht.getName().toLowerCase())
+                                        return lht.getName().compareToIgnoreCase(rht.getName())
                                                 * reversed;
                                     }
 
                                     // If the comparison is not between two directories, return the
                                     // file with alphabetic order first.
 
-                                    if (!rht.isDirectory() && !lht.isDirectory())
-                                        return -Long.compare(lht.length(), rht.length()) * reversed;
+                                    if (!rht.isDirectory() && !lht.isDirectory()) {
+                                        int result =
+                                                Long.compare(lht.length(), rht.length()) * reversed;
+
+                                        if (result == 0)
+                                            return lht.getName().compareToIgnoreCase(rht.getName())
+                                                    * reversed;
+
+                                        return result;
+                                    }
 
                                     // If the comparison is between a directory and a file, return
                                     // the directory.
 
-                                    if (rht.isDirectory() && !lht.isDirectory()) return reversed;
+                                    if (lht.isDirectory() && !rht.isDirectory())
+                                        return -1 * reversed;
+                                    if (!lht.isDirectory() && rht.isDirectory()) return reversed;
 
                                     // Same as above but order of occurrence is different.
 
@@ -458,37 +323,34 @@ public class FilePickerDialog extends ListPickerDialogBase {
 
                     break;
                 }
-
             default:
                 {
                     comparator =
                             new Comparator<File>() {
+                                @SuppressWarnings("DuplicateExpressions")
                                 @Override
                                 public int compare(File lht, File rht) {
                                     if (rht.isDirectory() && lht.isDirectory()) {
                                         if (lht.getName().equals("...")) return -1 * reversed;
                                         if (rht.getName().equals("...")) return reversed;
 
-                                        String Filename = lht.getName().toLowerCase();
-
-                                        return Filename.compareTo(rht.getName().toLowerCase())
+                                        return lht.getName().compareToIgnoreCase(rht.getName())
                                                 * reversed;
                                     }
 
                                     // If the comparison is not between two directories, return the
                                     // file with alphabetic order first.
 
-                                    if (!rht.isDirectory() && !lht.isDirectory()) {
-                                        String Filename = lht.getName().toLowerCase();
-
-                                        return Filename.compareTo(rht.getName().toLowerCase())
+                                    if (!rht.isDirectory() && !lht.isDirectory())
+                                        return lht.getName().compareToIgnoreCase(rht.getName())
                                                 * reversed;
-                                    }
 
                                     // If the comparison is between a directory and a file, return
                                     // the directory.
 
-                                    if (rht.isDirectory() && !lht.isDirectory()) return reversed;
+                                    if (lht.isDirectory() && !rht.isDirectory())
+                                        return -1 * reversed;
+                                    if (!lht.isDirectory() && rht.isDirectory()) return reversed;
 
                                     // Same as above but order of occurrence is different.
 
@@ -499,7 +361,6 @@ public class FilePickerDialog extends ListPickerDialogBase {
                     break;
                 }
         }
-
         return comparator;
     }
 
@@ -509,71 +370,68 @@ public class FilePickerDialog extends ListPickerDialogBase {
     private void actualizeToolbar() {
         // Sort by name
 
-        if (this.mProperties.sortBy == FilePickerDialog.SORT_BY_NAME) {
-            if (this.mProperties.sortOrder == FilePickerDialog.SORT_ORDER_NORMAL)
+        if (this.mSortBy == FilePickerDialog.SORT_BY_NAME) {
+            if (this.mSortOrder == FilePickerDialog.SORT_ORDER_NORMAL)
                 this.mNameColumn.setCompoundDrawablesWithIntrinsicBounds(
-                        0, 0, R.drawable.ic_file_picker_up, 0);
+                        0, 0, R.drawable.ic_file_picker_sort_normal, 0);
             else
                 this.mNameColumn.setCompoundDrawablesWithIntrinsicBounds(
-                        0, 0, R.drawable.ic_file_picker_down, 0);
+                        0, 0, R.drawable.ic_file_picker_sort_reverse, 0);
         } else {
             this.mNameColumn.setCompoundDrawables(null, null, null, null);
         }
 
         // Sort by date
 
-        if (this.mProperties.sortBy == FilePickerDialog.SORT_BY_LAST_MODIFIED) {
-            if (this.mProperties.sortOrder == FilePickerDialog.SORT_ORDER_NORMAL)
+        if (this.mSortBy == FilePickerDialog.SORT_BY_LAST_MODIFIED) {
+            if (this.mSortOrder == FilePickerDialog.SORT_ORDER_NORMAL)
                 this.mDateColumn.setCompoundDrawablesWithIntrinsicBounds(
-                        0, 0, R.drawable.ic_file_picker_up, 0);
+                        0, 0, R.drawable.ic_file_picker_sort_normal, 0);
             else
                 this.mDateColumn.setCompoundDrawablesWithIntrinsicBounds(
-                        0, 0, R.drawable.ic_file_picker_down, 0);
+                        0, 0, R.drawable.ic_file_picker_sort_reverse, 0);
         } else {
             this.mDateColumn.setCompoundDrawables(null, null, null, null);
         }
 
         // Sort by size
 
-        if (this.mProperties.sortBy == FilePickerDialog.SORT_BY_SIZE) {
-            if (this.mProperties.sortOrder == FilePickerDialog.SORT_ORDER_NORMAL)
+        if (this.mSortBy == FilePickerDialog.SORT_BY_SIZE) {
+            if (this.mSortOrder == FilePickerDialog.SORT_ORDER_NORMAL)
                 this.mSizeColumn.setCompoundDrawablesWithIntrinsicBounds(
-                        0, 0, R.drawable.ic_file_picker_up, 0);
+                        0, 0, R.drawable.ic_file_picker_sort_normal, 0);
             else
                 this.mSizeColumn.setCompoundDrawablesWithIntrinsicBounds(
-                        0, 0, R.drawable.ic_file_picker_down, 0);
+                        0, 0, R.drawable.ic_file_picker_sort_reverse, 0);
         } else {
             this.mSizeColumn.setCompoundDrawables(null, null, null, null);
         }
     }
 
     /**
-     * Actualize item comparator with new sorter order.
+     * Actualize item comparator with new sort order.
      *
-     * @param sortOrder new sorter order.
+     * @param sortBy new sorter order.
      */
-    private void actualizeComparator(int sortOrder) {
-        if (this.mProperties.sortBy == sortOrder) {
-            if (this.mProperties.sortOrder == FilePickerDialog.SORT_ORDER_NORMAL)
-                this.mProperties.sortOrder = FilePickerDialog.SORT_ORDER_REVERSE;
-            else this.mProperties.sortOrder = FilePickerDialog.SORT_ORDER_NORMAL;
+    private void actualizeComparator(int sortBy) {
+        if (this.mSortBy == sortBy) {
+            if (this.mSortOrder == FilePickerDialog.SORT_ORDER_NORMAL)
+                this.mSortOrder = FilePickerDialog.SORT_ORDER_REVERSE;
+            else this.mSortOrder = FilePickerDialog.SORT_ORDER_NORMAL;
         } else {
-            this.mProperties.sortBy = sortOrder;
+            this.mSortBy = sortBy;
 
-            switch (sortOrder) {
+            switch (sortBy) {
                 case FilePickerDialog.SORT_BY_LAST_MODIFIED:
-                    this.mProperties.sortOrder = FilePickerDialog.SORT_ORDER_REVERSE;
-                    break;
                 case FilePickerDialog.SORT_BY_SIZE:
-                    this.mProperties.sortOrder = FilePickerDialog.SORT_ORDER_REVERSE;
+                    this.mSortOrder = FilePickerDialog.SORT_ORDER_REVERSE;
                     break;
                 default:
-                    this.mProperties.sortOrder = FilePickerDialog.SORT_ORDER_NORMAL;
+                    this.mSortOrder = FilePickerDialog.SORT_ORDER_NORMAL;
                     break;
             }
         }
-
-        this.mSorter = createComparator(this.mProperties);
+        this.mSorter = createComparator(this);
 
         this.actualizeToolbar();
         this.reload();
@@ -582,23 +440,23 @@ public class FilePickerDialog extends ListPickerDialogBase {
     /**
      * Get toolbar from view.
      *
-     * @param toolbar toolbar resource.
+     * @param toolbar toolbar view.
      * @return a view contains toolbar.
      */
-    private View getToolbar(View toolbar) {
+    private View getToolbarView(View toolbar) {
         if (!(toolbar instanceof LinearLayout)) return null;
+        this.mToolbarView = (LinearLayout) toolbar;
 
-        this.mToolbar = (LinearLayout) toolbar;
-
-        this.mNameColumn = this.mToolbar.findViewById(R.id.file_picker_dialog_sort_name_label);
-        this.mDateColumn = this.mToolbar.findViewById(R.id.file_picker_dialog_sort_date_label);
-        this.mSizeColumn = this.mToolbar.findViewById(R.id.file_picker_dialog_sort_size_label);
+        this.mNameColumn = this.mToolbarView.findViewById(R.id.file_picker_dialog_sort_name_label);
+        this.mDateColumn = this.mToolbarView.findViewById(R.id.file_picker_dialog_sort_date_label);
+        this.mSizeColumn = this.mToolbarView.findViewById(R.id.file_picker_dialog_sort_size_label);
 
         this.actualizeToolbar();
 
         // Name column
 
-        RelativeLayout nameButton = this.mToolbar.findViewById(R.id.file_picker_dialog_sort_name);
+        RelativeLayout nameButton =
+                this.mToolbarView.findViewById(R.id.file_picker_dialog_sort_name);
 
         nameButton.setOnClickListener(
                 new View.OnClickListener() {
@@ -610,7 +468,8 @@ public class FilePickerDialog extends ListPickerDialogBase {
 
         // Date column
 
-        RelativeLayout dateButton = this.mToolbar.findViewById(R.id.file_picker_dialog_sort_date);
+        RelativeLayout dateButton =
+                this.mToolbarView.findViewById(R.id.file_picker_dialog_sort_date);
 
         dateButton.setOnClickListener(
                 new View.OnClickListener() {
@@ -623,7 +482,8 @@ public class FilePickerDialog extends ListPickerDialogBase {
 
         // Size column
 
-        RelativeLayout sizeButton = this.mToolbar.findViewById(R.id.file_picker_dialog_sort_size);
+        RelativeLayout sizeButton =
+                this.mToolbarView.findViewById(R.id.file_picker_dialog_sort_size);
 
         sizeButton.setOnClickListener(
                 new View.OnClickListener() {
@@ -636,7 +496,7 @@ public class FilePickerDialog extends ListPickerDialogBase {
         // Actualize button
 
         RelativeLayout actualizeButton =
-                this.mToolbar.findViewById(R.id.file_picker_dialog_actualize);
+                this.mToolbarView.findViewById(R.id.file_picker_dialog_actualize);
 
         actualizeButton.setOnClickListener(
                 new View.OnClickListener() {
@@ -645,42 +505,58 @@ public class FilePickerDialog extends ListPickerDialogBase {
                         FilePickerDialog.this.reload();
                     }
                 });
-
         return toolbar;
     }
 
     /* ---- Derived Methods ---- */
 
     /**
-     * generates a toolbar which will be placed between the title bar and the list.
+     * Obtains an item used to create first item in list for return to parent item.
      *
-     * @return a view object.
+     * @param item item of the list to display.
+     * @return a BackItem object to used to create first item in list for return to parent item.
      */
-    @SuppressLint("InflateParams")
     @Override
-    protected View createToolBar() {
-        if (!this.mProperties.showToolbar) {
-            return null;
+    protected BackItem getBackItem(ItemBase item) {
+        if (item != null) {
+            Object itemTag = item.getTag();
+
+            if (itemTag instanceof File) {
+                File path = (File) itemTag;
+
+                if (path.isDirectory() && path.canRead()) {
+                    String rootPath = this.mRootDir.getAbsolutePath();
+                    String otherPath = path.getAbsolutePath();
+
+                    if (!otherPath.equals(rootPath) && otherPath.startsWith(rootPath)) {
+                        File parent = ((File) itemTag).getParentFile();
+
+                        if (parent != null && parent.canRead()) {
+                            return new BackItem(
+                                    this.mContext.getString(
+                                            R.string.file_picker_dialog_parent_directory),
+                                    this.mContext.getString(
+                                            R.string.file_picker_dialog_parent_directory_text),
+                                    R.drawable.ic_file_picker_folder,
+                                    parent);
+                        }
+                    }
+                }
+            }
         }
 
-        if (this.mToolbar == null && this.mContext != null) {
-            LayoutInflater inflater = LayoutInflater.from(this.mContext);
-
-            return this.getToolbar(inflater.inflate(R.layout.file_picker_dialog_toolbar, null));
-        }
-
-        return this.mToolbar;
+        return null;
     }
 
     /**
-     * Obtains an item the list of items corresponding to the children of the root item.
+     * Obtains an item list of items corresponding to the children of the root item.
      *
-     * @param item Root element of the list to display.
-     * @return a collection of Item objet to load in list.
+     * @param item item of the list to display.
+     * @return a collection of PickerItem objects to load in list.
      */
     @Override
-    protected Collection<Item> getChildrenFor(ItemBase item) {
-        ArrayList<Item> itemList = new ArrayList<>();
+    protected Collection<PickerItem> getChildrenFor(ItemBase item) {
+        ArrayList<PickerItem> itemList = new ArrayList<>();
 
         if (item != null) {
             Object itemTag = item.getTag();
@@ -689,7 +565,7 @@ public class FilePickerDialog extends ListPickerDialogBase {
                 File path = (File) itemTag;
 
                 if (path.isDirectory() && path.canRead()) {
-                    String rootPath = this.mProperties.root.getAbsolutePath();
+                    String rootPath = this.mRootDir.getAbsolutePath();
                     String otherPath = path.getAbsolutePath();
 
                     if (otherPath.equals(rootPath) || otherPath.startsWith(rootPath)) {
@@ -711,7 +587,7 @@ public class FilePickerDialog extends ListPickerDialogBase {
                     }
                 } else {
                     Toast.makeText(
-                                    this.getContext(),
+                                    this.mContext,
                                     R.string.file_picker_dialog_error_dir_access,
                                     Toast.LENGTH_SHORT)
                             .show();
@@ -723,13 +599,45 @@ public class FilePickerDialog extends ListPickerDialogBase {
     }
 
     /**
-     * Obtains an item to display dialog header.
+     * Obtains an item used to initialize the selector.
      *
-     * @param item Root element of the list to display.
-     * @return a ItemBase objet to define title, sub-title and icon of dialog header.
+     * @return a ItemBase object to used to initialize the selector.
      */
     @Override
-    protected ItemBase getHeaderItem(ItemBase item) {
+    protected ItemBase getRootItem() {
+        if (this.checkStorageAccessPermissions()) {
+            if (this.mRootDir.isDirectory() && this.mOffsetDir.isDirectory()) {
+                String rootPath = this.mRootDir.getAbsolutePath();
+                String offsetPath = this.mOffsetDir.getAbsolutePath();
+
+                if (offsetPath.equals(rootPath) || offsetPath.startsWith(rootPath)) {
+                    if (this.mOffsetDir.canRead()) return this.createItem(this.mOffsetDir);
+                }
+            }
+
+            if (this.mRootDir.isDirectory() && this.mRootDir.canRead())
+                return this.createItem(this.mRootDir);
+            if (this.mErrorDir.isDirectory() && this.mErrorDir.canRead())
+                return this.createItem(this.mErrorDir);
+        }
+
+        Toast.makeText(
+                        this.mContext,
+                        R.string.file_picker_dialog_error_dir_access,
+                        Toast.LENGTH_SHORT)
+                .show();
+
+        return null;
+    }
+
+    /**
+     * Obtains an item to display dialog header.
+     *
+     * @param item item of the list to display.
+     * @return a ItemBase object to define title, sub-title and icon of dialog header.
+     */
+    @Override
+    protected ItemBase getTitleItem(ItemBase item) {
         if (item != null) {
             Object itemTag = item.getTag();
 
@@ -744,74 +652,22 @@ public class FilePickerDialog extends ListPickerDialogBase {
     }
 
     /**
-     * Obtains an item used to create first item in list for return to parent item.
+     * Obtains a toolbar view which will be placed between the title bar and the list.
      *
-     * @return a ItemBase objet to used to create first item in list for return to parent item.
+     * @return a view object.
      */
+    @SuppressLint("InflateParams")
     @Override
-    protected BackItem getBackItem(ItemBase item) {
-        if (item != null) {
-            Object itemTag = item.getTag();
+    protected View getToolBarView() {
+        if (!this.mToolbarIsVisible) return null;
 
-            if (itemTag instanceof File) {
-                File path = (File) itemTag;
+        if (this.mToolbarView == null) {
+            LayoutInflater inflater = LayoutInflater.from(this.mContext);
 
-                if (path.isDirectory() && path.canRead()) {
-                    String rootPath = this.mProperties.root.getAbsolutePath();
-                    String otherPath = path.getAbsolutePath();
-
-                    if (!otherPath.equals(rootPath) && otherPath.startsWith(rootPath)) {
-                        File parent = ((File) itemTag).getParentFile();
-
-                        if (parent != null && parent.canRead()) {
-                            return new BackItem(
-                                    super.getContext()
-                                            .getString(
-                                                    R.string.file_picker_dialog_parent_directory),
-                                    super.getContext()
-                                            .getString(
-                                                    R.string
-                                                            .file_picker_dialog_parent_directory_text),
-                                    R.drawable.ic_file_picker_folder,
-                                    parent);
-                        }
-                    }
-                }
-            }
+            return this.getToolbarView(inflater.inflate(R.layout.file_picker_dialog_toolbar, null));
         }
 
-        return null;
-    }
-
-    /**
-     * Obtains an item used to initialize the selector.
-     *
-     * @return a ItemBase objet to used to initialize the selector.
-     */
-    @Override
-    protected ItemBase getRootItem() {
-        if (this.checkStorageAccessPermissions()) {
-            if (this.mProperties.root.isDirectory() && this.mProperties.offsetDir.isDirectory()) {
-                String rootPath = this.mProperties.root.getAbsolutePath();
-                String offsetPath = this.mProperties.offsetDir.getAbsolutePath();
-
-                if (offsetPath.equals(rootPath) || offsetPath.startsWith(rootPath)) {
-                    if (this.mProperties.offsetDir.canRead())
-                        return this.createItem(this.mProperties.offsetDir);
-                }
-            }
-
-            if (this.mProperties.root.isDirectory() && this.mProperties.root.canRead())
-                return this.createItem(this.mProperties.offsetDir);
-        }
-
-        Toast.makeText(
-                        this.getContext(),
-                        R.string.file_picker_dialog_error_dir_access,
-                        Toast.LENGTH_SHORT)
-                .show();
-
-        return null;
+        return this.mToolbarView;
     }
 
     /**
@@ -820,8 +676,8 @@ public class FilePickerDialog extends ListPickerDialogBase {
      * @return a boolean value who indicates if the picker is in multiple selection mode.
      */
     @Override
-    protected boolean isMultiSelectMode() {
-        return (this.mProperties.selectionMode == FilePickerDialog.MULTI_MODE);
+    protected boolean isMultiSelectionMode() {
+        return (this.mOnMultiChoiceValidationListener != null);
     }
 
     /**
@@ -831,18 +687,20 @@ public class FilePickerDialog extends ListPickerDialogBase {
      */
     @Override
     protected void onValidateSelection(Collection<PickableItem> items) {
-        if (this.mListener != null) {
+        if (items.size() > 0) {
             ArrayList<String> result = new ArrayList<>();
 
             for (PickableItem item : items) {
                 Object itemTag = item.getTag();
 
-                if (itemTag instanceof File) {
-                    result.add(((File) itemTag).getAbsolutePath());
-                }
+                if (itemTag instanceof File) result.add(((File) itemTag).getAbsolutePath());
             }
 
-            this.mListener.onValidateSelection(result.toArray(new String[0]));
+            if (this.mOnSingleChoiceValidationListener != null)
+                this.mOnSingleChoiceValidationListener.onClick(this, result.get(0));
+
+            if (this.mOnMultiChoiceValidationListener != null)
+                this.mOnMultiChoiceValidationListener.onClick(this, result.toArray(new String[0]));
         }
     }
 
@@ -854,31 +712,28 @@ public class FilePickerDialog extends ListPickerDialogBase {
      * @param file file.
      * @return a picker item corresponding to the specified file.
      */
-    private Item createItem(File file) {
-        String strDateFormat =
-                super.getContext().getString(R.string.file_picker_dialog_date_format);
+    private PickerItem createItem(File file) {
+        String strDateFormat = this.mContext.getString(R.string.file_picker_dialog_date_format);
 
         SimpleDateFormat dateFormat = new SimpleDateFormat(strDateFormat, Locale.getDefault());
 
         String itemDate = dateFormat.format(new Date(file.lastModified()));
-
         if (file.isDirectory()) {
-            String Label =
-                    super.getContext().getString(R.string.file_picker_dialog_last_edit_directory);
+            String Label = this.mContext.getString(R.string.file_picker_dialog_last_edit_directory);
 
             String subTitle = String.format(Locale.getDefault(), Label, itemDate);
 
-            switch (this.mProperties.selectionType) {
+            switch (this.mSelectionType) {
                 case FilePickerDialog.DIR_SELECT:
                 case FilePickerDialog.FILE_AND_DIR_SELECT:
                     return new PickableItem(
                             file.getName(), subTitle, R.drawable.ic_file_picker_folder, file, true);
                 default:
-                    return new Item(
+                    return new PickerItem(
                             file.getName(), subTitle, R.drawable.ic_file_picker_folder, file, true);
             }
         } else {
-            String Label = super.getContext().getString(R.string.file_picker_dialog_last_edit_file);
+            String Label = this.mContext.getString(R.string.file_picker_dialog_last_edit_file);
 
             String fileSize = this.formatSize(file.length());
 
@@ -897,19 +752,16 @@ public class FilePickerDialog extends ListPickerDialogBase {
      */
     private String formatSize(long bytes) {
         if (mSizeDecimalFormat == null) {
-
             mSizeDecimalFormat = new DecimalFormat("#.##");
 
             mSizeDecimalFormat.setDecimalFormatSymbols(DecimalFormatSymbols.getInstance(Locale.US));
         }
-
         String[] units =
                 super.getContext()
                         .getResources()
                         .getStringArray(R.array.file_picker_dialog_size_units);
 
         for (int Index = 0; Index < units.length; Index++) {
-
             float size = (float) bytes / (float) Math.pow(1024, Index);
 
             if (size < 1024)
@@ -919,23 +771,378 @@ public class FilePickerDialog extends ListPickerDialogBase {
         return bytes + " B";
     }
 
-    /* ---- Public Methods ---- */
+    /** Provide a builder for a file picker dialog. */
+    @SuppressWarnings("UnusedReturnValue")
+    public static class Builder {
+        // Attributes
 
-    /**
-     * Get current properties.
-     *
-     * @return a properties object.
-     */
-    public Properties getProperties() {
-        return this.mProperties.cloneProperties();
-    }
+        private final PickerParams P;
+        private int mRequestCode = 0;
+        private int mSelectionType = FilePickerDialog.FILE_AND_DIR_SELECT;
+        private File mRootDir = new File(FilePickerDialog.DEFAULT_DIR);
+        private File mErrorDir = new File(FilePickerDialog.DEFAULT_DIR);
+        private File mOffsetDir = new File(FilePickerDialog.DEFAULT_DIR);
+        private Pattern[] mPatterns = new Pattern[0];
+        private int mSortBy = FilePickerDialog.SORT_BY_NAME;
+        private int mSortOrder = FilePickerDialog.SORT_ORDER_NORMAL;
+        private boolean mToolbarIsVisible = true;
+        private OnSingleChoiceValidationListener<String> mOnSingleChoiceValidationListener = null;
+        private OnMultiChoiceValidationListener<String> mOnMultiChoiceValidationListener = null;
 
-    /**
-     * Allows you to be informed when validating the file selection.
-     *
-     * @param listener listener.
-     */
-    public void setValidateSelectionListener(ValidateSelectionListener listener) {
-        this.mListener = listener;
+        /**
+         * Creates a builder for a file picker dialog that uses the default dialog dialog theme.
+         *
+         * @param context the parent context
+         */
+        public Builder(@NonNull Context context) {
+            this(context, R.style.ListPickerDialogBase);
+        }
+
+        /**
+         * Creates a builder for a file picker dialog that uses an explicit theme resource.
+         *
+         * @param context the parent context
+         * @param themeResId the resource ID of the theme against which to inflate this dialog, or
+         *     {@code 0} to use the parent {@code context}'s default dialog dialog theme
+         */
+        public Builder(@NonNull Context context, @StyleRes int themeResId) {
+            this.P = new PickerParams(context, themeResId);
+
+            this.P.iconId = R.drawable.ic_file_picker_header;
+        }
+
+        /* Base List Picker Properties */
+
+        /**
+         * Set the resource id of the {@link Drawable} to be used in the title.
+         *
+         * @return this builder object to allow for chaining of calls to set methods
+         */
+        public Builder setIcon(@DrawableRes int iconId) {
+            this.P.iconId = iconId;
+            return this;
+        }
+
+        /**
+         * Set the title using the given resource id.
+         *
+         * @return this builder object to allow for chaining of calls to set methods
+         */
+        public Builder setTitle(@StringRes int titleId) {
+            this.P.title = this.P.context.getText(titleId);
+            return this;
+        }
+
+        /**
+         * Set the title displayed in the.
+         *
+         * @return this builder object to allow for chaining of calls to set methods
+         */
+        public Builder setTitle(@Nullable CharSequence title) {
+            this.P.title = title;
+            return this;
+        }
+
+        /**
+         * Set a listener to be invoked when the positive button of the dialog is pressed.
+         *
+         * @param textId The resource id of the text to display in the positive button
+         * @return this builder object to allow for chaining of calls to set methods
+         */
+        public Builder setPositiveButton(@StringRes int textId) {
+            this.P.positiveButtonText = this.P.context.getText(textId);
+            return this;
+        }
+
+        /**
+         * Set a listener to be invoked when the positive button of the dialog is pressed.
+         *
+         * @param text The text to display in the positive button
+         * @return this builder object to allow for chaining of calls to set methods
+         */
+        public Builder setPositiveButton(CharSequence text) {
+            this.P.positiveButtonText = text;
+            return this;
+        }
+
+        /**
+         * Set a listener to be invoked when the positive button of the dialog is pressed.
+         *
+         * @return this builder object to allow for chaining of calls to set methods
+         */
+        public Builder setPositiveButtonListener(OnClickListener listener) {
+            this.P.positiveButtonListener = listener;
+            return this;
+        }
+
+        /**
+         * Set a listener to be invoked when the negative button of the dialog is pressed.
+         *
+         * @param textId The resource id of the text to display in the negative button
+         * @return this builder object to allow for chaining of calls to set methods
+         */
+        public Builder setNegativeButton(@StringRes int textId) {
+            this.P.negativeButtonText = this.P.context.getText(textId);
+            return this;
+        }
+
+        /**
+         * Set a listener to be invoked when the negative button of the dialog is pressed.
+         *
+         * @param text The text to display in the negative button
+         * @return this builder object to allow for chaining of calls to set methods
+         */
+        public Builder setNegativeButton(CharSequence text) {
+            this.P.negativeButtonText = text;
+            return this;
+        }
+
+        /**
+         * Set a listener to be invoked when the negative button of the dialog is pressed.
+         *
+         * @return this builder object to allow for chaining of calls to set methods
+         */
+        public Builder setNegativeButtonListener(OnClickListener listener) {
+            this.P.negativeButtonListener = listener;
+            return this;
+        }
+
+        /**
+         * Sets whether the dialog is cancelable or not. Default is true.
+         *
+         * @return this builder object to allow for chaining of calls to set methods
+         */
+        public Builder setCancelable(boolean cancelable) {
+            this.P.cancelable = cancelable;
+            return this;
+        }
+
+        /**
+         * Sets the callback that will be called if the dialog is canceled.
+         *
+         * @return this builder object to allow for chaining of calls to set methods
+         */
+        public Builder setOnCancelListener(OnCancelListener onCancelListener) {
+            this.P.onCancelListener = onCancelListener;
+            return this;
+        }
+
+        /* File Picker Properties */
+
+        /**
+         * Sets the code used for request permission.
+         *
+         * @return this builder object to allow for chaining of calls to set methods
+         */
+        public Builder setRequestCode(int requestCode) {
+            this.mRequestCode = requestCode;
+            return this;
+        }
+
+        /**
+         * Sets selection Type defines that whether a File/Directory or both of these has to be
+         * selected. Default value is FILE_SELECT.
+         *
+         * <p>FILE_SELECT, DIR_SELECT, FILE_AND_DIR_SELECT are the three selection types.
+         *
+         * @return this builder object to allow for chaining of calls to set methods
+         */
+        public Builder setSelectionType(int selectionType) {
+            this.mSelectionType = selectionType;
+            return this;
+        }
+
+        /**
+         * Sets parent/root directory. List of Files are populated from here. Can be set to any
+         * readable directory. /sdcard is the default location.
+         *
+         * <p>EX. /sdcard
+         *
+         * <p>Ex. /mnt
+         *
+         * @return this builder object to allow for chaining of calls to set methods
+         */
+        public Builder setRootDir(@NonNull CharSequence rootDir) {
+            this.mRootDir = new File(rootDir.toString());
+            return this;
+        }
+
+        /**
+         * Sets parent/root directory. List of Files are populated from here. Can be set to any
+         * readable directory. /sdcard is the default location.
+         *
+         * <p>EX. /sdcard
+         *
+         * <p>Ex. /mnt
+         *
+         * @return this builder object to allow for chaining of calls to set methods
+         */
+        public Builder setRootDir(@NonNull File rootDir) {
+            this.mRootDir = rootDir;
+            return this;
+        }
+
+        /**
+         * Sets directory is used when root directory is not readable or accessible. /sdcard is the
+         * default location.
+         *
+         * <p>Ex. /sdcard
+         *
+         * <p>Ex. /mnt
+         *
+         * @return this builder object to allow for chaining of calls to set methods
+         */
+        public Builder setErrorDir(@NonNull CharSequence errorDir) {
+            this.mErrorDir = new File(errorDir.toString());
+            return this;
+        }
+
+        /**
+         * Sets directory is used when root directory is not readable or accessible. /sdcard is the
+         * default location.
+         *
+         * <p>Ex. /sdcard
+         *
+         * <p>Ex. /mnt
+         *
+         * @return this builder object to allow for chaining of calls to set methods
+         */
+        public Builder setErrorDir(@NonNull File errorDir) {
+            this.mErrorDir = errorDir;
+            return this;
+        }
+
+        /**
+         * Sets directory can be used as an offset. It is the first directory that is shown in
+         * dialog. Consider making it Root's sub-directory.
+         *
+         * <p>Ex. Root: /sdcard
+         *
+         * <p>Ex. Offset: /sdcard/Music/Country
+         *
+         * @return this builder object to allow for chaining of calls to set methods
+         */
+        public Builder setOffsetDir(@NonNull CharSequence offsetDir) {
+            this.mOffsetDir = new File(offsetDir.toString());
+            return this;
+        }
+
+        /**
+         * Sets directory can be used as an offset. It is the first directory that is shown in
+         * dialog. Consider making it Root's sub-directory.
+         *
+         * <p>Ex. Root: /sdcard
+         *
+         * <p>Ex. Offset: /sdcard/Music/Country
+         *
+         * @return this builder object to allow for chaining of calls to set methods
+         */
+        public Builder setOffsetDir(@NonNull File offsetDir) {
+            this.mOffsetDir = offsetDir;
+            return this;
+        }
+
+        /**
+         * Add pattern to filter files.
+         *
+         * <p>Ex. "(.*)\\.jpg"
+         *
+         * @return this builder object to allow for chaining of calls to set methods
+         */
+        public Builder addPattern(@NonNull CharSequence pattern) {
+            return this.addPattern(Pattern.compile(pattern.toString()));
+        }
+
+        /**
+         * Add pattern to filter files.
+         *
+         * <p>Ex. "(.*)\\.jpg"
+         *
+         * @return this builder object to allow for chaining of calls to set methods
+         */
+        public Builder addPattern(@NonNull Pattern pattern) {
+            ArrayList<Pattern> patterns = new ArrayList<>(Arrays.asList(this.mPatterns));
+
+            patterns.add(pattern);
+
+            this.mPatterns = patterns.toArray(new Pattern[0]);
+
+            return this;
+        }
+
+        /**
+         * Sort by defines the sort order of the items. Default value is SORT_BY_NAME.
+         *
+         * <p>SORT_BY_NAME, SORT_BY_LAST_MODIFIED, SORT_BY_SIZE are the three sort by.
+         *
+         * @return this builder object to allow for chaining of calls to set methods
+         */
+        public Builder setSortBy(int sortBy) {
+            this.mSortBy = sortBy;
+            return this;
+        }
+
+        /**
+         * Sort order defines the sort direction of the items. Default value is SORT_ORDER_NORMAL.
+         *
+         * <p>SORT_ORDER_NORMAL, SORT_ORDER_REVERSE are the two sort orders.
+         *
+         * @return this builder object to allow for chaining of calls to set methods
+         */
+        public Builder setSortOrder(int sortOrder) {
+            this.mSortOrder = sortOrder;
+            return this;
+        }
+
+        /**
+         * Show/Hide toolbar view. Default value is true.
+         *
+         * @return this builder object to allow for chaining of calls to set methods
+         */
+        public Builder setToolbarIsVisible(boolean toolbarIsVisible) {
+            this.mToolbarIsVisible = toolbarIsVisible;
+            return this;
+        }
+
+        /**
+         * Sets the callback that will be called if the dialog is validated (single selection mode).
+         *
+         * @return this builder object to allow for chaining of calls to set methods
+         */
+        public Builder setOnSingleChoiceValidationListener(
+                OnSingleChoiceValidationListener<String> listener) {
+            this.mOnSingleChoiceValidationListener = listener;
+
+            return this;
+        }
+
+        /**
+         * Sets the callback that will be called if the dialog is validated (multiple selection
+         * mode).
+         *
+         * @return this builder object to allow for chaining of calls to set methods
+         */
+        public Builder setOnMultiChoiceValidationListener(
+                OnMultiChoiceValidationListener<String> listener) {
+            this.mOnMultiChoiceValidationListener = listener;
+
+            return this;
+        }
+
+        /**
+         * Creates an {@link FilePickerDialog} with the arguments supplied to this builder and
+         * immediately displays the dialog.
+         *
+         * <p>Calling this method is functionally identical to:
+         *
+         * @return a FilePickerDialog dialog.
+         */
+        public FilePickerDialog show() {
+            final FilePickerDialog dialog = new FilePickerDialog(this);
+
+            dialog.show();
+
+            return dialog;
+        }
     }
 }

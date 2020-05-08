@@ -7,7 +7,7 @@ Android Library to create picker dialogs.
 ### Inspired by
 [Angad Singh - filepicker](https://www.github.com/angads25/android-filepicker) and [Aefyr - filepicker](https://www.github.com/Aefyr/android-filepicker)
 
-### Where to Find:
+### Where to Find
 [ ![Download](https://api.bintray.com/packages/ndagnas/maven/Picker-Dialogs/images/download.svg) ](https://bintray.com/ndagnas/maven/Picker-Dialogs/_latestVersion)
 
 ### Picker Dialog Base Features
@@ -25,6 +25,9 @@ Android Library to create picker dialogs.
 ### Json Picker Features
 * Select by node.
 
+### Builder Design Patterns
+* All dialogs support
+
 ### Installation
 * Library is also Available in JCenter, So just put this in your app dependencies to use it:
 ```gradle
@@ -36,52 +39,29 @@ Android Library to create picker dialogs.
 ```
 
 ```gradle
-    compile 'com.github.ndagnas:pickers:0.1.2'
+    compile 'com.github.ndagnas:pickers:0.1.3'
 ```
 
 ### Usage
-## FilePickerDialog
-1. Start by creating an instance of `FilePickerDialog.Properties`.
+Use same of AlertDialog.
 
     ```java
-        FilePickerDialog.Properties properties = new FilePickerDialog.Properties();
+		new FilePickerDialog.Builder (this)
+				.setRequestCode(EXTERNAL_READ_PERMISSION_GRANT)
+				.setTitle("Select a File")
+				.setOffsetDir(FilePickerDialog.DEFAULT_DIR)
+				.setRootDir(FilePickerDialog.DEFAULT_DIR)
+				.setErrorDir(FilePickerDialog.DEFAULT_DIR)
+				.setSelectionType(FilePickerDialog.FILE_SELECT)
+				.setOnSingleChoiceValidationListener(
+					new PickerInterface.OnSingleChoiceValidationListener<String>() {
+						@Override
+						public void onClick ( PickerInterface sender, String result ) {
+							//file is the path of file selected by the Application User.
+						}
+					})
+				.show();
     ```
-
-    Now 'Properties' has certain parameters.
-
-2. Assign values to each Dialog Property using `FilePickerDialog` class.
-
-    ```java
-        properties.selectionMode = FilePickerDialog.SINGLE_MODE;
-        properties.selectionType = FilePickerDialog.FILE_SELECT;
-        properties.root = new File(FilePickerDialog.DEFAULT_DIR);
-        properties.errorDir = new File(FilePickerDialog.DEFAULT_DIR);
-        properties.offsetDir = new File(FilePickerDialog.DEFAULT_DIR);
-        properties.patterns = new String[] {"(.*)\\.txt"};
-        properties.sortBy = FilePickerDialog.SORT_BY_NAME;
-        properties.sortOrder = FilePickerDialog.SORT_ORDER_NORMAL;
-        properties.showToolbar = true;
-    ```
-
-3. Next create an instance of `FilePickerDialog`, and pass `Context` and `Properties` references as parameters. Optional: You can change the title of dialog. Default is current directory name. Set the select button string. Default is Select. Set the cancel button string. Defalut is Cancel.
-
-    ```java
-        FilePickerDialog dialog = new FilePickerDialog(MainActivity.this,properties);
-        dialog.setTitle("Select a File");
-    ```
-
-4.  Next, Attach `FilePickerDialog.ValidateSelectionListener` to `FilePickerDialog` as below,
-    ```java
-        dialog.setValidateSelectionListener(new FilePickerDialog.ValidateSelectionListener() {
-            @Override
-            public void onValidateSelection(String[] files) {
-                //files is the array of the paths of files selected by the Application User.
-            }
-        });
-    ```
-    An array of paths is returned whenever user press the `select` button`.
-
-5. Use ```dialog.show()``` method to show dialog.
 
 ### NOTE:
 Marshmallow and above requests for the permission on runtime. You should override `onRequestPermissionsResult` in Activity/AppCompatActivity class and show the dialog only if permissions have been granted.
@@ -91,7 +71,7 @@ Marshmallow and above requests for the permission on runtime. You should overrid
         @Override
         public void onRequestPermissionsResult(int requestCode,@NonNull String permissions[],@NonNull int[] grantResults) {
             switch (requestCode) {
-                case FilePickerDialog.EXTERNAL_READ_PERMISSION_GRANT: {
+                case EXTERNAL_READ_PERMISSION_GRANT: {
                     if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                         if(dialog!=null)
                         {   //Show dialog if the read permission has been granted.
@@ -108,8 +88,7 @@ Marshmallow and above requests for the permission on runtime. You should overrid
 ```
 
 ### Important:
-* `root`, `errorDir`, `offsetDir` must have valid directory/file paths.
-* `patterns` must not have '.'.
+* `rootDir`, `errorDir`, `offsetDir` must have valid directory/file paths.
 * `patterns` must are regexes.
 
 ### Screenshot

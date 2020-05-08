@@ -20,18 +20,20 @@ package com.github.ndagnas.pickersdemo;
 
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.RadioGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.github.ndagnas.pickers.FilePickerDialog;
-import com.github.ndagnas.pickers.JsonPickerDialog;
+import com.github.ndagnas.pickers.JSonPickerDialog;
+import com.github.ndagnas.pickers.PickerInterface;
 
 import org.json.JSONObject;
 
@@ -39,10 +41,8 @@ import java.io.File;
 
 /** Defines main activity. */
 public class MainActivity extends AppCompatActivity {
-    private EditText mPatterns;
-    private EditText mRootDirectory;
 
-    private FilePickerDialog.Properties mProperties = new FilePickerDialog.Properties();
+    static final int EXTERNAL_READ_PERMISSION_GRANT = 1;
 
     /**
      * Called on dialog create.
@@ -53,75 +53,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        this.mProperties.selectionMode = FilePickerDialog.SINGLE_MODE;
-        this.mProperties.selectionType = FilePickerDialog.FILE_AND_DIR_SELECT;
-
-        this.setContentView(R.layout.activity_main);
-
-        RadioGroup selectionMode = this.findViewById(R.id.activity_main_selection_mode);
-
-        selectionMode.check(R.id.activity_main_selection_mode_single);
-
-        selectionMode.setOnCheckedChangeListener(
-                new RadioGroup.OnCheckedChangeListener() {
-                    @Override
-                    public void onCheckedChanged(RadioGroup group, int checkedId) {
-                        switch (checkedId) {
-                            case R.id.activity_main_selection_mode_single:
-                                {
-                                    MainActivity.this.mProperties.selectionMode =
-                                            FilePickerDialog.SINGLE_MODE;
-
-                                    break;
-                                }
-
-                            case R.id.activity_main_selection_mode_plutiple:
-                                {
-                                    MainActivity.this.mProperties.selectionMode =
-                                            FilePickerDialog.MULTI_MODE;
-
-                                    break;
-                                }
-                        }
-                    }
-                });
-
-        RadioGroup selectionType = this.findViewById(R.id.activity_main_selection_type);
-
-        selectionType.check(R.id.activity_main_selection_type_files_and_directories);
-
-        selectionType.setOnCheckedChangeListener(
-                new RadioGroup.OnCheckedChangeListener() {
-                    @Override
-                    public void onCheckedChanged(RadioGroup group, int checkedId) {
-                        switch (checkedId) {
-                            case R.id.activity_main_selection_type_file:
-                                {
-                                    MainActivity.this.mProperties.selectionType =
-                                            FilePickerDialog.FILE_SELECT;
-
-                                    break;
-                                }
-                            case R.id.activity_main_selection_type_directory:
-                                {
-                                    MainActivity.this.mProperties.selectionType =
-                                            FilePickerDialog.DIR_SELECT;
-
-                                    break;
-                                }
-                            case R.id.activity_main_selection_type_files_and_directories:
-                                {
-                                    MainActivity.this.mProperties.selectionType =
-                                            FilePickerDialog.FILE_AND_DIR_SELECT;
-
-                                    break;
-                                }
-                        }
-                    }
-                });
-
-        this.mPatterns = this.findViewById(R.id.activity_main_patterns);
-        this.mRootDirectory = this.findViewById(R.id.activity_main_root_directory);
+		this.setContentView ( R.layout.activity_main );
 
         Button showFilePickerDialogButton =
                 this.findViewById(R.id.activity_main_show_file_picker_dialog);
@@ -150,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(
             int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode == FilePickerDialog.EXTERNAL_READ_PERMISSION_GRANT) {
+        if (requestCode == EXTERNAL_READ_PERMISSION_GRANT) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 this.showFilePickerDialog();
             } else {
@@ -165,42 +97,76 @@ public class MainActivity extends AppCompatActivity {
 
     /** Show file picker dialog. */
     public void showFilePickerDialog() {
-        String rootDirectory = this.mRootDirectory.getText().toString();
 
-        if (rootDirectory.length() == 0) rootDirectory = FilePickerDialog.DEFAULT_DIR;
+        FilePickerDialog.Builder builder = new FilePickerDialog.Builder(this).setRequestCode ( EXTERNAL_READ_PERMISSION_GRANT );
 
-        MainActivity.this.mProperties.offsetDir = new File(rootDirectory);
-        MainActivity.this.mProperties.root = new File(FilePickerDialog.DEFAULT_DIR);
-        MainActivity.this.mProperties.errorDir = new File(FilePickerDialog.DEFAULT_DIR);
+        switch (((RadioGroup) this.findViewById(R.id.activity_main_selection_type))
+                .getCheckedRadioButtonId()) {
+            case R.id.activity_main_selection_type_file:
+                builder.setSelectionType(FilePickerDialog.FILE_SELECT);
+                break;
+            case R.id.activity_main_selection_type_directory:
+                builder.setSelectionType(FilePickerDialog.DIR_SELECT);
+                break;
+            case R.id.activity_main_selection_type_files_and_directories:
+                builder.setSelectionType(FilePickerDialog.FILE_AND_DIR_SELECT);
+                break;
+        }
 
-        if (this.mPatterns.length() > 0)
-            MainActivity.this.mProperties.patterns =
-                    new String[] {this.mPatterns.getText().toString()};
+        CharSequence pattern = ((TextView) this.findViewById(R.id.activity_main_pattern)).getText();
 
-        FilePickerDialog Dialog = new FilePickerDialog(this, MainActivity.this.mProperties);
+        if (!TextUtils.isEmpty(pattern)) builder.addPattern(pattern);
 
-        Dialog.setValidateSelectionListener(
-                new FilePickerDialog.ValidateSelectionListener() {
-                    @Override
-                    public void onValidateSelection(String[] files) {
-                        boolean isFirst = true;
+        CharSequence rootDir =
+                ((TextView) this.findViewById(R.id.activity_main_root_directory)).getText();
 
-                        StringBuilder result = new StringBuilder();
+        if (!TextUtils.isEmpty(rootDir)) builder.setRootDir(new File(rootDir.toString()));
 
-                        for (String file : files) {
-                            if (!isFirst) result.append(", ");
+        switch (((RadioGroup) this.findViewById(R.id.activity_main_selection_mode))
+                .getCheckedRadioButtonId()) {
+            case R.id.activity_main_selection_mode_single:
+                builder.setOnSingleChoiceValidationListener(
+                                new PickerInterface.OnSingleChoiceValidationListener<String>() {
+                                    @Override
+                                    public void onClick(PickerInterface sender, String result) {
+                                        Toast.makeText(
+                                                        MainActivity.this,
+                                                        result,
+                                                        Toast.LENGTH_SHORT)
+                                                .show();
+                                    }
+                                })
+                        .show();
 
-                            result.append(file);
+                break;
+            case R.id.activity_main_selection_mode_plutiple:
+                builder.setOnMultiChoiceValidationListener(
+                                new PickerInterface.OnMultiChoiceValidationListener<String>() {
+                                    @Override
+                                    public void onClick(PickerInterface sender, String[] result) {
+                                        boolean isFirst = true;
 
-                            isFirst = false;
-                        }
+                                        StringBuilder content = new StringBuilder();
 
-                        Toast.makeText(MainActivity.this, result.toString(), Toast.LENGTH_SHORT)
-                                .show();
-                    }
-                });
+                                        for (String file : result) {
+                                            if (!isFirst) content.append(", ");
 
-        Dialog.show();
+                                            content.append(file);
+
+                                            isFirst = false;
+                                        }
+
+                                        Toast.makeText(
+                                                        MainActivity.this,
+                                                        content.toString(),
+                                                        Toast.LENGTH_SHORT)
+                                                .show();
+                                    }
+                                })
+                        .show();
+
+                break;
+        }
     }
 
     /** Show json picker dialog. */
@@ -244,32 +210,32 @@ public class MainActivity extends AppCompatActivity {
         try {
             JSONObject jsonObject = new JSONObject(Content);
 
-            JsonPickerDialog.Properties Props = new JsonPickerDialog.Properties();
-
-            Props.root = jsonObject;
-            Props.jsonTitleNodeName = "title";
-            Props.jsonSubTitleNodeName = "subtitle";
-            Props.jsonChildrenNodeName = "children";
-            Props.titleMask = null;
-            Props.selectionType = JsonPickerDialog.NODE_WITHOUT_CHILD_SELECT;
-            Props.sortBy = JsonPickerDialog.SORT_BY_HAVE_CHILDREN;
-            Props.sortOrder = JsonPickerDialog.SORT_ORDER_NORMAL;
-
-            JsonPickerDialog Dialog = new JsonPickerDialog(this, Props);
-
-            Dialog.setValidateSelectionListener(
-                    new JsonPickerDialog.ValidateSelectionListener() {
-                        @Override
-                        public void onValidateSelection(JSONObject[] objects) {
-                            Toast.makeText(
-                                            MainActivity.this,
-                                            objects[0].toString(),
-                                            Toast.LENGTH_SHORT)
-                                    .show();
-                        }
-                    });
-
-            Dialog.show();
+            new JSonPickerDialog.Builder(this)
+                    .setRootNode(jsonObject)
+                    .setTitleNodeName("title")
+                    .setSubTitleNodeName("subtitle")
+                    .setChildrenNodeName("children")
+                    .setSelectionType(JSonPickerDialog.NODE_WITHOUT_CHILD_SELECT)
+					.setSortOrder (JSonPickerDialog.SORT_ORDER_NORMAL)
+					.setSortBy (JSonPickerDialog.SORT_BY_HAVE_CHILDREN)
+                    .setOnSingleChoiceValidationListener(
+                            new PickerInterface.OnSingleChoiceValidationListener<JSONObject>() {
+                                @Override
+                                public void onClick(PickerInterface sender, JSONObject result) {
+                                    try {
+                                        Toast.makeText(
+                                                        MainActivity.this,
+                                                        result.toString(),
+                                                        Toast.LENGTH_SHORT)
+                                                .show();
+                                    } catch (Exception Err) {
+                                        Log.e(
+                                                "JsonPickerDialog.getChildrenFor",
+                                                "Exception: " + Err.toString());
+                                    }
+                                }
+                            })
+                    .show();
         } catch (Exception Err) {
             Log.e("JsonPickerDialog.getChildrenFor", "Exception: " + Err.toString());
         }

@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- *    Created by Nicolas Dagnas on 01-05-2020, updated on 02-05-2020.
+ *    Created by Nicolas Dagnas on 01-05-2020, updated on 08-05-2020.
  *
  */
 
@@ -23,7 +23,9 @@ package com.github.ndagnas.pickers;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,30 +39,38 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.StyleRes;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
-/** Defines a base picker dialog. */
+/** Defines a base picker dialog. *** */
 @SuppressWarnings({"unused", "WeakerAccess"})
 public class ListPickerDialogBase extends Dialog {
     /** Defines a base item for picker. */
     public class ItemBase {
-        private final int mIconResource;
-        private final String mSubTitle;
+        // Attributes
+
+        private final int mIconId;
+        private final CharSequence mSubTitle;
         private final Object mTag;
-        private final String mTitle;
+        private final CharSequence mTitle;
 
         /**
          * Object initialisation.
          *
          * @param title text displayed in the title of the item.
          * @param subTitle text displayed in the sub-title of the item.
-         * @param iconResource resourceId of the icon displayed on the left of the item.
+         * @param mIconId resource id of the icon displayed on the left of the item.
          */
-        public ItemBase(@NonNull String title, @NonNull String subTitle, int iconResource) {
-            this.mIconResource = iconResource;
+        public ItemBase(
+                @Nullable CharSequence title,
+                @Nullable CharSequence subTitle,
+                @DrawableRes int mIconId) {
+            this.mIconId = mIconId;
             this.mSubTitle = subTitle;
             this.mTag = null;
             this.mTitle = title;
@@ -71,12 +81,15 @@ public class ListPickerDialogBase extends Dialog {
          *
          * @param title text displayed in the title of the item.
          * @param subTitle text displayed in the sub-title of the item.
-         * @param iconResource resourceId of the icon displayed on the left of the item.
+         * @param mIconId resource id of the icon displayed on the left of the item.
          * @param tag object associate with the item.
          */
         public ItemBase(
-                @NonNull String title, @NonNull String subTitle, int iconResource, Object tag) {
-            this.mIconResource = iconResource;
+                @Nullable CharSequence title,
+                @Nullable CharSequence subTitle,
+                @DrawableRes int mIconId,
+                Object tag) {
+            this.mIconId = mIconId;
             this.mSubTitle = subTitle;
             this.mTag = tag;
             this.mTitle = title;
@@ -89,16 +102,16 @@ public class ListPickerDialogBase extends Dialog {
          */
         @Override
         public String toString() {
-            return this.mTitle;
+            return (TextUtils.isEmpty(this.mTitle)) ? "" : this.mTitle.toString();
         }
 
         /**
-         * Get resourceid of the icon of item.
+         * Get resource id of the icon of item.
          *
-         * @return a integer contains the resourceid of the icon of item.
+         * @return a integer contains the resource id of the icon of item.
          */
-        public int getIconResource() {
-            return this.mIconResource;
+        public @DrawableRes int getIconId() {
+            return this.mIconId;
         }
 
         /**
@@ -106,7 +119,7 @@ public class ListPickerDialogBase extends Dialog {
          *
          * @return a string contains sub-title of the item.
          */
-        public String getSubTitle() {
+        public @Nullable CharSequence getSubTitle() {
             return this.mSubTitle;
         }
 
@@ -115,7 +128,7 @@ public class ListPickerDialogBase extends Dialog {
          *
          * @return a string contains title of the item.
          */
-        public String getTitle() {
+        public @Nullable CharSequence getTitle() {
             return this.mTitle;
         }
 
@@ -136,10 +149,13 @@ public class ListPickerDialogBase extends Dialog {
          *
          * @param title text displayed in the title of the item.
          * @param subTitle text displayed in the sub-title of the item.
-         * @param iconResource resourceId of the icon displayed on the left of the item.
+         * @param mIconId resource id of the icon displayed on the left of the item.
          */
-        public BackItem(@NonNull String title, @NonNull String subTitle, int iconResource) {
-            super(title, subTitle, iconResource);
+        public BackItem(
+                @NonNull CharSequence title,
+                @Nullable CharSequence subTitle,
+                @DrawableRes int mIconId) {
+            super(title, subTitle, mIconId);
         }
 
         /**
@@ -147,17 +163,22 @@ public class ListPickerDialogBase extends Dialog {
          *
          * @param title text displayed in the title of the item.
          * @param subTitle text displayed in the sub-title of the item.
-         * @param iconResource resourceId of the icon displayed on the left of the item.
+         * @param mIconId resource id of the icon displayed on the left of the item.
          * @param tag object associate with the item.
          */
         public BackItem(
-                @NonNull String title, @NonNull String subTitle, int iconResource, Object tag) {
-            super(title, subTitle, iconResource, tag);
+                @NonNull CharSequence title,
+                @Nullable CharSequence subTitle,
+                @DrawableRes int mIconId,
+                Object tag) {
+            super(title, subTitle, mIconId, tag);
         }
     }
 
-    /** Defines a item for navigation. */
-    public class Item extends ItemBase {
+    /** Defines a item for navigation (not pickable). */
+    public class PickerItem extends ItemBase {
+        // Attributes
+
         private final boolean mHasChildren;
 
         /**
@@ -165,15 +186,15 @@ public class ListPickerDialogBase extends Dialog {
          *
          * @param title text displayed in the title of the item.
          * @param subTitle text displayed in the sub-title of the item.
-         * @param iconResource resourceId of the icon displayed on the left of the item.
+         * @param mIconId resource id of the icon displayed on the left of the item.
          * @param hasChildren indicates if the item has children.
          */
-        public Item(
-                @NonNull String title,
-                @NonNull String subTitle,
-                int iconResource,
+        public PickerItem(
+                @NonNull CharSequence title,
+                @Nullable CharSequence subTitle,
+                @DrawableRes int mIconId,
                 boolean hasChildren) {
-            super(title, subTitle, iconResource);
+            super(title, subTitle, mIconId);
 
             this.mHasChildren = hasChildren;
         }
@@ -183,17 +204,17 @@ public class ListPickerDialogBase extends Dialog {
          *
          * @param title text displayed in the title of the item.
          * @param subTitle text displayed in the sub-title of the item.
-         * @param iconResource resourceId of the icon displayed on the left of the item.
+         * @param mIconId resource id of the icon displayed on the left of the item.
          * @param tag object associate with the item.
          * @param hasChildren indicates if the item has children.
          */
-        public Item(
-                @NonNull String title,
-                @NonNull String subTitle,
-                int iconResource,
+        public PickerItem(
+                @NonNull CharSequence title,
+                @Nullable CharSequence subTitle,
+                @DrawableRes int mIconId,
                 Object tag,
                 boolean hasChildren) {
-            super(title, subTitle, iconResource, tag);
+            super(title, subTitle, mIconId, tag);
 
             this.mHasChildren = hasChildren;
         }
@@ -209,7 +230,9 @@ public class ListPickerDialogBase extends Dialog {
     }
 
     /** Defines a item for navigation. */
-    public class PickableItem extends Item {
+    public class PickableItem extends PickerItem {
+        // Attributes
+
         private boolean mIsPicked = false;
 
         /**
@@ -217,10 +240,13 @@ public class ListPickerDialogBase extends Dialog {
          *
          * @param title text displayed in the title of the item.
          * @param subTitle text displayed in the sub-title of the item.
-         * @param iconResource resourceId of the icon displayed on the left of the item.
+         * @param mIconId resource id of the icon displayed on the left of the item.
          */
-        public PickableItem(@NonNull String title, @NonNull String subTitle, int iconResource) {
-            super(title, subTitle, iconResource, false);
+        public PickableItem(
+                @NonNull CharSequence title,
+                @Nullable CharSequence subTitle,
+                @DrawableRes int mIconId) {
+            super(title, subTitle, mIconId, false);
         }
 
         /**
@@ -228,15 +254,15 @@ public class ListPickerDialogBase extends Dialog {
          *
          * @param title text displayed in the title of the item.
          * @param subTitle text displayed in the sub-title of the item.
-         * @param iconResource resourceId of the icon displayed on the left of the item.
+         * @param mIconId resource id of the icon displayed on the left of the item.
          * @param hasChildren indicates if the item has children.
          */
         public PickableItem(
-                @NonNull String title,
-                @NonNull String subTitle,
-                int iconResource,
+                @NonNull CharSequence title,
+                @Nullable CharSequence subTitle,
+                @DrawableRes int mIconId,
                 boolean hasChildren) {
-            super(title, subTitle, iconResource, hasChildren);
+            super(title, subTitle, mIconId, hasChildren);
         }
 
         /**
@@ -244,12 +270,15 @@ public class ListPickerDialogBase extends Dialog {
          *
          * @param title text displayed in the title of the item.
          * @param subTitle text displayed in the sub-title of the item.
-         * @param iconResource resourceId of the icon displayed on the left of the item.
+         * @param mIconId resource id of the icon displayed on the left of the item.
          * @param tag object associate with the item.
          */
         public PickableItem(
-                @NonNull String title, @NonNull String subTitle, int iconResource, Object tag) {
-            super(title, subTitle, iconResource, tag, false);
+                @NonNull CharSequence title,
+                @Nullable CharSequence subTitle,
+                @DrawableRes int mIconId,
+                Object tag) {
+            super(title, subTitle, mIconId, tag, false);
         }
 
         /**
@@ -257,17 +286,17 @@ public class ListPickerDialogBase extends Dialog {
          *
          * @param title text displayed in the title of the item.
          * @param subTitle text displayed in the sub-title of the item.
-         * @param iconResource resourceId of the icon displayed on the left of the item.
+         * @param mIconId resource id of the icon displayed on the left of the item.
          * @param tag object associate with the item.
          * @param hasChildren indicates if the item has children.
          */
         public PickableItem(
-                @NonNull String title,
-                @NonNull String subTitle,
-                int iconResource,
+                @NonNull CharSequence title,
+                @Nullable CharSequence subTitle,
+                @DrawableRes int mIconId,
                 Object tag,
                 boolean hasChildren) {
-            super(title, subTitle, iconResource, tag, hasChildren);
+            super(title, subTitle, mIconId, tag, hasChildren);
         }
 
         /**
@@ -291,11 +320,13 @@ public class ListPickerDialogBase extends Dialog {
 
     /** Defines a ViewItem for Adapter. */
     static class ItemViewHolder {
+        // Attributes
+
         private final View SelfView;
         private final ImageView mIcon;
         private final TextView mTitle;
         private final TextView mSubTitle;
-        private final CheckBox mcheckbox;
+        private final CheckBox mCheckbox;
 
         /**
          * Object initialisation.
@@ -307,21 +338,21 @@ public class ListPickerDialogBase extends Dialog {
             this.mIcon = View.findViewById(R.id.list_picker_dialog_base_item_icon);
             this.mTitle = View.findViewById(R.id.list_picker_dialog_base_item_title);
             this.mSubTitle = View.findViewById(R.id.list_picker_dialog_base_item_sub_title);
-            this.mcheckbox = View.findViewById(R.id.list_picker_dialog_base_item_checkbox);
+            this.mCheckbox = View.findViewById(R.id.list_picker_dialog_base_item_checkbox);
         }
 
         /**
-         * Apply datas of item on current ViewItem.
+         * Apply data of item on current ViewItem.
          *
          * @param item associate item.
          */
-        void applyDatas(@NonNull ItemBase item) {
-            this.mIcon.setImageResource(item.getIconResource());
+        void applyData(@NonNull ItemBase item) {
+            this.mIcon.setImageResource(item.getIconId());
             this.mTitle.setText(item.getTitle());
 
-            String subTitle = item.getSubTitle();
+            CharSequence subTitle = item.getSubTitle();
 
-            if (subTitle != null && subTitle.length() > 0) {
+            if (!TextUtils.isEmpty(subTitle)) {
                 this.mSubTitle.setText(subTitle);
 
                 this.mSubTitle.setVisibility(View.VISIBLE);
@@ -332,19 +363,21 @@ public class ListPickerDialogBase extends Dialog {
             }
 
             if (item instanceof PickableItem) {
-                this.mcheckbox.setChecked(((PickableItem) item).isPicked());
+                this.mCheckbox.setChecked(((PickableItem) item).isPicked());
 
-                this.mcheckbox.setVisibility(View.VISIBLE);
+                this.mCheckbox.setVisibility(View.VISIBLE);
             } else {
-                this.mcheckbox.setChecked(false);
+                this.mCheckbox.setChecked(false);
 
-                this.mcheckbox.setVisibility(View.GONE);
+                this.mCheckbox.setVisibility(View.GONE);
             }
         }
     }
 
     /** Defines a adapter object use in ListView. */
     static class PickerAdapter extends BaseAdapter {
+        // Attributes
+
         private final ListPickerDialogBase mOwner;
         private final ArrayList<ItemBase> mItems = new ArrayList<>();
 
@@ -363,14 +396,14 @@ public class ListPickerDialogBase extends Dialog {
          * @param backItem item in first position used for back action.
          * @param items new item list.
          */
-        public void replaceAll(BackItem backItem, @NonNull Collection<Item> items) {
+        public void replaceAll(BackItem backItem, @NonNull Collection<PickerItem> items) {
             this.mItems.clear();
 
             this.notifyDataSetChanged();
 
             if (backItem != null) this.mItems.add(backItem);
 
-            for (Item item : items) {
+            for (PickerItem item : items) {
                 if (item != null) this.mItems.add(item);
             }
 
@@ -403,13 +436,14 @@ public class ListPickerDialogBase extends Dialog {
             final ItemBase item = this.mItems.get(Index);
 
             if (item != null) {
-                Holder.applyDatas(item);
+                Holder.applyData(item);
 
                 Holder.SelfView.setOnClickListener(
                         new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
-                                if (item instanceof PickableItem && !((Item) item).hasChildren()) {
+                                if (item instanceof PickableItem
+                                        && !((PickerItem) item).hasChildren()) {
                                     PickableItem pickableItem = (PickableItem) item;
 
                                     boolean picked = !pickableItem.isPicked();
@@ -423,7 +457,7 @@ public class ListPickerDialogBase extends Dialog {
 
                                     PickerAdapter.this.notifyDataSetChanged();
 
-                                    PickerAdapter.this.mOwner.actualizeSelectButtonLabel();
+                                    PickerAdapter.this.mOwner.actualizePositiveButtonText();
                                 } else {
                                     PickerAdapter.this.mOwner.onItemClick(item);
                                 }
@@ -431,7 +465,7 @@ public class ListPickerDialogBase extends Dialog {
                         });
 
                 if (item instanceof PickableItem) {
-                    Holder.mcheckbox.setOnCheckedChangeListener(
+                    Holder.mCheckbox.setOnCheckedChangeListener(
                             new CompoundButton.OnCheckedChangeListener() {
                                 @Override
                                 public void onCheckedChanged(
@@ -449,7 +483,7 @@ public class ListPickerDialogBase extends Dialog {
                                                     pickableItem))
                                         PickerAdapter.this.notifyDataSetChanged();
 
-                                    PickerAdapter.this.mOwner.actualizeSelectButtonLabel();
+                                    PickerAdapter.this.mOwner.actualizePositiveButtonText();
                                 }
                             });
                 }
@@ -467,7 +501,7 @@ public class ListPickerDialogBase extends Dialog {
         private boolean checkOtherPickedItems(PickableItem pickableItem) {
             boolean result = false;
 
-            if (!this.mOwner.isMultiSelectMode()) {
+            if (!this.mOwner.isMultiSelectionMode()) {
                 for (ItemBase item : this.mItems) {
                     if (!item.equals(pickableItem)
                             && item instanceof PickableItem
@@ -548,36 +582,44 @@ public class ListPickerDialogBase extends Dialog {
 
     private static java.util.Locale DEF_LOCAL = java.util.Locale.getDefault();
 
+    private final ListPickerDialogBase mSelf;
+    private final int mIconId;
+    private final CharSequence mTitle;
+    private final CharSequence mNegativeButtonText;
+    private final DialogInterface.OnClickListener mNegativeButtonListener;
+    private final CharSequence mPositiveButtonText;
+    private final DialogInterface.OnClickListener mPositiveButtonListener;
     private PickerAdapter mAdapter = null;
     private ItemBase mRootItem = null;
     private BackItem mBackItem = null;
-    private String mTitle = null;
-    private String mBtnCancelLabel = null;
-    private String mBtnSelectLabel = null;
+    private ImageView mIconView = null;
+    private TextView mTitleView = null;
+    private TextView mSubTitleView = null;
     private ListView mListView = null;
-    private ImageView mImgTitle = null;
-    private TextView mTxtTitle = null;
-    private TextView mTxtSubTitle = null;
-    private Button mBtnCancel = null;
-    private Button mBtnSelect = null;
+    private Button mPositiveButton = null;
 
     /**
-     * Object initialisation.
+     * Create a list picker dialog.
      *
-     * @param context current context.
+     * @param controller dialog controller.
      */
-    protected ListPickerDialogBase(@NonNull Context context) {
-        super(context, R.style.ListPickerDialogBase);
-    }
+    protected ListPickerDialogBase(@NonNull PickerParams controller) {
+        super(controller.context, controller.theme);
 
-    /**
-     * Object initialisation.
-     *
-     * @param context current context.
-     * @param themeResId style resource id.
-     */
-    protected ListPickerDialogBase(@NonNull Context context, int themeResId) {
-        super(context, themeResId);
+        this.mSelf = this;
+
+        super.setTitle(controller.title);
+        super.setCancelable(controller.cancelable);
+        super.setOnCancelListener(controller.onCancelListener);
+        super.setOnDismissListener(controller.onDismissListener);
+        super.setOnKeyListener(controller.onKeyListener);
+
+        this.mIconId = controller.iconId;
+        this.mTitle = controller.title;
+        this.mNegativeButtonText = controller.negativeButtonText;
+        this.mNegativeButtonListener = controller.negativeButtonListener;
+        this.mPositiveButtonText = controller.positiveButtonText;
+        this.mPositiveButtonListener = controller.positiveButtonListener;
     }
 
     /* ---- Derived Methods ---- */
@@ -595,22 +637,51 @@ public class ListPickerDialogBase extends Dialog {
 
         this.setContentView(R.layout.list_picker_dialog_base);
 
-        this.mImgTitle = this.findViewById(R.id.list_picker_dialog_base_icon);
-        this.mTxtTitle = this.findViewById(R.id.list_picker_dialog_base_title);
-        this.mTxtSubTitle = this.findViewById(R.id.list_picker_dialog_base_sub_title);
-        this.mListView = this.findViewById(R.id.list_picker_dialog_base_list);
-        this.mBtnCancel = this.findViewById(R.id.list_picker_dialog_base_cancel_button);
-        this.mBtnSelect = this.findViewById(R.id.list_picker_dialog_base_select_button);
+        // Adapter
 
-        this.mBtnCancel.setOnClickListener(
+        this.mListView = this.findViewById(R.id.list_picker_dialog_base_list);
+
+        this.mAdapter = new PickerAdapter(this);
+
+        this.mListView.setAdapter(this.mAdapter);
+
+        // Icon
+
+        this.mIconView = this.findViewById(R.id.list_picker_dialog_base_icon);
+
+        if (this.mIconId != 0) this.mIconView.setImageResource(this.mIconId);
+
+        // Title
+
+        this.mTitleView = this.findViewById(R.id.list_picker_dialog_base_title);
+        this.mSubTitleView = this.findViewById(R.id.list_picker_dialog_base_sub_title);
+
+        if (!TextUtils.isEmpty(this.mTitle)) this.mTitleView.setText(this.mTitle);
+
+        // Negative button
+
+        Button negativeButton = this.findViewById(R.id.list_picker_dialog_base_negative_button);
+
+        negativeButton.setOnClickListener(
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View View) {
                         ListPickerDialogBase.this.dismiss();
+
+                        if (mSelf.mNegativeButtonListener != null)
+                            mSelf.mNegativeButtonListener.onClick(
+                                    mSelf, DialogInterface.BUTTON_NEGATIVE);
                     }
                 });
 
-        this.mBtnSelect.setOnClickListener(
+        if (TextUtils.isEmpty(this.mNegativeButtonText)) negativeButton.setVisibility(View.GONE);
+        else negativeButton.setText(this.mNegativeButtonText);
+
+        // Positive button
+
+        this.mPositiveButton = this.findViewById(R.id.list_picker_dialog_base_positive_button);
+
+        this.mPositiveButton.setOnClickListener(
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View View) {
@@ -618,21 +689,31 @@ public class ListPickerDialogBase extends Dialog {
                                 ListPickerDialogBase.this.mAdapter.getPickedItem());
 
                         ListPickerDialogBase.this.dismiss();
+
+                        if (mSelf.mPositiveButtonListener != null)
+                            mSelf.mPositiveButtonListener.onClick(
+                                    mSelf, DialogInterface.BUTTON_POSITIVE);
                     }
                 });
 
-        this.mAdapter = new PickerAdapter(this);
+        if (TextUtils.isEmpty(this.mPositiveButtonText))
+            this.mPositiveButton.setVisibility(View.GONE);
+        else this.actualizePositiveButtonText();
 
-        this.mListView.setAdapter(this.mAdapter);
+        // Buttons view
 
-        View header = this.createToolBar();
+        if (TextUtils.isEmpty(this.mNegativeButtonText)
+                && TextUtils.isEmpty(this.mPositiveButtonText))
+            this.findViewById(R.id.list_picker_dialog_base_buttons).setVisibility(View.GONE);
 
-        if (header != null) {
+        // Toolbar View
+
+        View toolbarView = this.getToolBarView();
+
+        if (toolbarView != null) {
             LinearLayout headerLayout = this.findViewById(R.id.list_picker_dialog_base_toolbar);
 
-            if (headerLayout != null) {
-                headerLayout.addView(header);
-            }
+            if (headerLayout != null) headerLayout.addView(toolbarView);
         }
     }
 
@@ -656,66 +737,52 @@ public class ListPickerDialogBase extends Dialog {
 
     /* ---- Privates Methods ---- */
 
-    /** Actualize cancel button label. */
-    private void actualizeCancelButtonLabel() {
-        if (this.mBtnCancel != null) {
-            String btnName = this.mBtnCancelLabel;
-
-            if (btnName == null || btnName.length() == 0)
-                btnName =
-                        super.getContext()
-                                .getString(R.string.list_picker_dialog_base_cancel_button);
-
-            this.mBtnCancel.setText(btnName);
-        }
-    }
-
-    /** Actualize select button label. */
-    private void actualizeSelectButtonLabel() {
-        if (this.mBtnSelect != null && this.mAdapter != null) {
-            String btnName = this.mBtnSelectLabel;
-
-            if (btnName == null || btnName.length() == 0)
-                btnName =
-                        super.getContext()
-                                .getString(R.string.list_picker_dialog_base_select_button);
-
+    /** Actualize positive button label. */
+    private void actualizePositiveButtonText() {
+        if (this.mPositiveButton != null
+                && this.mAdapter != null
+                && !TextUtils.isEmpty(this.mPositiveButtonText)) {
             int pickedItemCount = this.mAdapter.getPickedItemCount();
 
             if (pickedItemCount > 0) {
-                this.mBtnSelect.setEnabled(true);
+                this.mPositiveButton.setEnabled(true);
 
                 if (pickedItemCount > 1) {
-                    this.mBtnSelect.setText(
+                    this.mPositiveButton.setText(
                             String.format(
                                     DEF_LOCAL,
                                     "%s (%d)",
-                                    btnName,
+                                    this.mPositiveButtonText,
                                     this.mAdapter.getPickedItemCount()));
                 } else {
-                    this.mBtnSelect.setText(btnName);
+                    this.mPositiveButton.setText(this.mPositiveButtonText);
                 }
             } else {
-                this.mBtnSelect.setEnabled(false);
+                this.mPositiveButton.setEnabled(false);
 
-                this.mBtnSelect.setText(btnName);
+                this.mPositiveButton.setText(this.mPositiveButtonText);
             }
         }
     }
 
-    /** Actualize header dialog. */
-    private void actualizeHeaderDialog() {
-        if (this.mImgTitle != null && this.mTxtTitle != null && this.mTxtSubTitle != null) {
+    /** Actualize title dialog. */
+    private void actualizeTitle() {
+        if (this.mTitleView != null && this.mSubTitleView != null) {
+            ItemBase titleItem = this.getTitleItem(this.mRootItem);
 
-            ItemBase headerItem = this.getHeaderItem(this.mRootItem);
+            if (titleItem != null) {
+                this.mIconView.setImageResource(
+                        (titleItem.mIconId != 0) ? titleItem.mIconId : this.mIconId);
 
-            if (headerItem != null) {
-                if (this.mTitle != null && this.mTitle.length() > 0)
-                    this.mTxtTitle.setText(this.mTitle);
-                else this.mTxtTitle.setText(headerItem.getTitle());
+                this.mTitleView.setText(
+                        (!TextUtils.isEmpty(this.mTitle)) ? this.mTitle : titleItem.mTitle);
+                this.mSubTitleView.setText(
+                        (!TextUtils.isEmpty(titleItem.mSubTitle)) ? titleItem.mSubTitle : "");
 
-                this.mImgTitle.setImageResource(headerItem.getIconResource());
-                this.mTxtSubTitle.setText(headerItem.getSubTitle());
+                this.mSubTitleView.setVisibility(
+                        (!TextUtils.isEmpty(this.mSubTitleView.getText()))
+                                ? View.VISIBLE
+                                : View.INVISIBLE);
             }
         }
     }
@@ -730,7 +797,7 @@ public class ListPickerDialogBase extends Dialog {
             this.mRootItem = rootItem;
             this.mBackItem = this.getBackItem(rootItem);
 
-            this.actualizeHeaderDialog();
+            this.actualizeTitle();
 
             this.mListView.setAdapter(null);
 
@@ -738,8 +805,7 @@ public class ListPickerDialogBase extends Dialog {
 
             this.mListView.setAdapter(this.mAdapter);
 
-            this.actualizeCancelButtonLabel();
-            this.actualizeSelectButtonLabel();
+            this.actualizePositiveButtonText();
         }
     }
 
@@ -751,7 +817,7 @@ public class ListPickerDialogBase extends Dialog {
     private void onItemClick(ItemBase item) {
         if (item instanceof BackItem) {
             this.navigateToItem(item);
-        } else if (item instanceof Item && ((Item) item).hasChildren()) {
+        } else if (item instanceof PickerItem && ((PickerItem) item).hasChildren()) {
             this.navigateToItem(item);
         }
     }
@@ -759,55 +825,56 @@ public class ListPickerDialogBase extends Dialog {
     /* ---- Protected Methods, to be overridden in subclasses ---- */
 
     /**
-     * generates a toolbar which will be placed between the title bar and the list.
-     *
-     * @return a view object.
-     */
-    protected View createToolBar() {
-        return null;
-    }
-
-    /**
-     * Obtains an item the list of items corresponding to the children of the root item.
-     *
-     * <p>Exemple: new Item ("File 1", "size: ...", R.drawable..., parent, true)
-     *
-     * <p>Exemple: new PickableItem ("File 1", "size: ...", R.drawable..., parent, true)
-     *
-     * @param item root item of the list to display.
-     * @return a collection of Item objet to load in list.
-     */
-    protected Collection<Item> getChildrenFor(ItemBase item) {
-        return new ArrayList<>();
-    }
-
-    /**
-     * Obtains an item to display dialog header.
-     *
-     * @param item root item of the list to display.
-     * @return a ItemBase objet to define title, sub-title and icon of dialog header.
-     */
-    protected ItemBase getHeaderItem(ItemBase item) {
-        return item;
-    }
-
-    /**
      * Obtains an item used to create first item in list for return to parent item.
      *
      * <p>Exemple: new ItemBase ("...", "Parent directory", R.drawable...)
      *
-     * @return a ItemBase objet to used to create first item in list for return to parent item.
+     * @param item item of the list to display.
+     * @return a BackItem object to used to create first item in list for return to parent item.
      */
     protected BackItem getBackItem(ItemBase item) {
         return null;
     }
 
     /**
+     * Obtains an item list of items corresponding to the children of the root item.
+     *
+     * <p>Exemple: new Item ("File 1", "size: ...", R.drawable..., parent, true)
+     *
+     * <p>Exemple: new PickableItem ("File 1", "size: ...", R.drawable..., parent, true)
+     *
+     * @param item item of the list to display.
+     * @return a collection of PickerItem objects to load in list.
+     */
+    protected Collection<PickerItem> getChildrenFor(ItemBase item) {
+        return new ArrayList<>();
+    }
+
+    /**
      * Obtains an item used to initialize the selector.
      *
-     * @return a ItemBase objet to used to initialize the selector.
+     * @return a ItemBase object to used to initialize the selector.
      */
     protected ItemBase getRootItem() {
+        return null;
+    }
+
+    /**
+     * Obtains an item to display dialog title.
+     *
+     * @param item item of the list to display.
+     * @return an ItemBase object to define title, sub-title and icon of dialog header.
+     */
+    protected ItemBase getTitleItem(ItemBase item) {
+        return item;
+    }
+
+    /**
+     * Obtains a toolbar view which will be placed between the title bar and the list.
+     *
+     * @return a view object.
+     */
+    protected View getToolBarView() {
         return null;
     }
 
@@ -816,7 +883,7 @@ public class ListPickerDialogBase extends Dialog {
      *
      * @return a boolean value who indicates if the picker is in multiple selection mode.
      */
-    protected boolean isMultiSelectMode() {
+    protected boolean isMultiSelectionMode() {
         return false;
     }
 
@@ -835,38 +902,71 @@ public class ListPickerDialogBase extends Dialog {
         else this.navigateToItem(this.mRootItem);
     }
 
-    /* ---- Public Methods ---- */
+    /** Provide a controller for a list picker dialog. */
+    protected static class PickerParams {
+        // Attributes
 
-    /**
-     * Set cancel button label.
-     *
-     * @param value new cancel button label.
-     */
-    public void setCancelButtonLabel(CharSequence value) {
-        this.mBtnCancelLabel = (value != null && value.length() > 0) ? value.toString() : null;
+        /** Theme id for dialog. */
+        final int theme;
 
-        this.actualizeCancelButtonLabel();
-    }
+        /** Default context. */
+        final Context context;
 
-    /**
-     * Set select button label.
-     *
-     * @param value new select button label.
-     */
-    public void setSelectButtonLabel(CharSequence value) {
-        this.mBtnSelectLabel = (value != null && value.length() > 0) ? value.toString() : null;
+        /** Resource id of title dialog. */
+        int iconId = 0;
 
-        this.actualizeSelectButtonLabel();
-    }
+        /** Title dialog. */
+        CharSequence title;
 
-    /**
-     * Set dialog title.
-     *
-     * @param value new cancel button label.
-     */
-    public void setTitle(CharSequence value) {
-        this.mTitle = (value != null && value.length() > 0) ? value.toString() : null;
+        /** Caption of positive button. */
+        CharSequence positiveButtonText;
 
-        this.actualizeHeaderDialog();
+        /** Listener to be invoked when the positive button of the dialog is pressed. */
+        DialogInterface.OnClickListener positiveButtonListener;
+
+        /** Caption of negative button. */
+        CharSequence negativeButtonText;
+
+        /** Listener to be invoked when the negative button of the dialog is pressed. */
+        DialogInterface.OnClickListener negativeButtonListener;
+
+        /** Dialog is cancelable or not. Default is true. */
+        boolean cancelable;
+
+        /** Callback that will be called if the dialog is canceled. */
+        DialogInterface.OnCancelListener onCancelListener;
+
+        /** Callback that will be called when the dialog is dismissed for any reason. */
+        DialogInterface.OnDismissListener onDismissListener;
+
+        /** Callback that will be called if a key is dispatched to the dialog. */
+        DialogInterface.OnKeyListener onKeyListener;
+
+        /**
+         * Creates a picker params for a list picker dialog that uses the default picker dialog
+         * theme.
+         *
+         * @param context the parent context
+         */
+        public PickerParams(@NonNull Context context) {
+            this(context, R.style.ListPickerDialogBase);
+        }
+
+        /**
+         * Creates a controller for a list picker dialog that uses an explicit theme resource.
+         *
+         * @param context the parent context
+         * @param themeResId the resource ID of the theme against which to inflate this dialog
+         */
+        public PickerParams(@NonNull Context context, @StyleRes int themeResId) {
+            this.context = context;
+            this.theme = themeResId;
+            this.cancelable = true;
+
+            this.negativeButtonText =
+                    context.getString(R.string.list_picker_dialog_base_negative_button);
+            this.positiveButtonText =
+                    context.getString(R.string.list_picker_dialog_base_positive_button);
+        }
     }
 }

@@ -82,11 +82,11 @@
 
             <View
                 android:layout_width="0dp"
-                android:layout_height="match_parent"
+                android:layout_height="1dp"
                 android:layout_weight="1"
                 android:background="@null" />
 
-            <Button android:id="@+id/list_picker_dialog_base_cancel_button"
+            <Button android:id="@+id/list_picker_dialog_base_negative_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/list_picker_dialog_base_button_margin"
@@ -95,11 +95,11 @@
                 android:paddingBottom="0dp"
                 android:paddingStart="@dimen/list_picker_dialog_base_button_padding"
                 android:paddingEnd="@dimen/list_picker_dialog_base_button_padding"
-                android:text="@string/list_picker_dialog_base_cancel_button"
+                android:text="@string/list_picker_dialog_base_negative_button"
                 android:textColor="@drawable/tc_list_picker_dialog_button"
                 style="?android:attr/buttonBarButtonStyle" />
 
-            <Button android:id="@+id/list_picker_dialog_base_select_button"
+            <Button android:id="@+id/list_picker_dialog_base_positive_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/list_picker_dialog_base_button_margin"
@@ -108,7 +108,7 @@
                 android:paddingBottom="0dp"
                 android:paddingStart="@dimen/list_picker_dialog_base_button_padding"
                 android:paddingEnd="@dimen/list_picker_dialog_base_button_padding"
-                android:text="@string/list_picker_dialog_base_select_button"
+                android:text="@string/list_picker_dialog_base_positive_button"
                 android:textColor="@drawable/tc_list_picker_dialog_button"
                 style="?android:attr/buttonBarButtonStyle" />
 

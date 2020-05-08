@@ -38,6 +38,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/activity_main_selection_mode_single"
+                    android:checked="true"
                     android:id="@+id/activity_main_selection_mode_single" />
 
                 <androidx.appcompat.widget.AppCompatRadioButton
@@ -73,6 +74,7 @@
 
                 <androidx.appcompat.widget.AppCompatRadioButton
                     android:id="@+id/activity_main_selection_type_files_and_directories"
+                    android:checked="true"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/activity_main_selection_type_files_and_directories" />
@@ -82,15 +84,15 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/activity_vertical_margin"
-                android:text="@string/activity_main_patterns"
+                android:text="@string/activity_main_pattern"
                 android:textStyle="bold" />
 
             <androidx.appcompat.widget.AppCompatEditText
-                android:id="@+id/activity_main_patterns"
+                android:id="@+id/activity_main_pattern"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/activity_vertical_margin"
-                android:hint="@string/activity_main_patterns_samples" />
+                android:hint="@string/activity_main_pattern_samples" />
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:layout_width="wrap_content"

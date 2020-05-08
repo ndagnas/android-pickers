@@ -14,8 +14,8 @@
     <string name="activity_main_selection_type_directory">Directory</string>
     <string name="activity_main_selection_type_files_and_directories">Files and Directories</string>
 
-    <string name="activity_main_patterns">Pattern (regex mode)</string>
-    <string name="activity_main_patterns_samples">ex: \"(.*)\\\\.txt\" (for: \"*.txt\" files)</string>
+    <string name="activity_main_pattern">Pattern (regex mode)</string>
+    <string name="activity_main_pattern_samples">ex: \"(.*)\\\\.txt\" (for: \"*.txt\" files)</string>
 
     <string name="activity_main_root_directory">Root Directory</string>
     <string name="activity_main_root_directory_samples">ex: /mnt/sdcard or leave empty</string>

@@ -18,7 +18,7 @@
 
    <!-- layout / list_picker_dialog_base -->
 
-   <string name="list_picker_dialog_base_cancel_button">Отмена</string>
-   <string name="list_picker_dialog_base_select_button">Выбрать</string>
+   <string name="list_picker_dialog_base_negative_button">Отмена</string>
+   <string name="list_picker_dialog_base_positive_button">Выбрать</string>
 
 </resources>

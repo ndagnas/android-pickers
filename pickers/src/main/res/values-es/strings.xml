@@ -18,7 +18,7 @@
 
    <!-- layout / list_picker_dialog_base -->
 
-   <string name="list_picker_dialog_base_cancel_button">Canclear</string>
-   <string name="list_picker_dialog_base_select_button">Seleccionar</string>
+   <string name="list_picker_dialog_base_negative_button">Canclear</string>
+   <string name="list_picker_dialog_base_positive_button">Seleccionar</string>
 
 </resources>
