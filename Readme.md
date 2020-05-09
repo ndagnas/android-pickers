@@ -39,7 +39,7 @@ Android Library to create picker dialogs.
 ```
 
 ```gradle
-    compile 'com.github.ndagnas:pickers:0.2.0'
+    compile 'com.github.ndagnas:pickers:0.2.2'
 ```
 
 ### Usage
