@@ -26,7 +26,8 @@ android:
     - 'google-gdk-license-.+'
 
 before_install:
-  - yes | sdkmanager --licenses
+  - yes | sdkmanager "platforms;android-29"
+  - yes | sdkmanager "build-tools;29.0.1"
   
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
