@@ -42,26 +42,37 @@ Android Library to create picker dialogs.
     compile 'com.github.ndagnas:pickers:0.2.2'
 ```
 
+### Autorisation (Android 10 or more)
+Update `AndroidManifest.xml` like this:
+
+```xml
+	<application
+		...
+		android:requestLegacyExternalStorage="true"
+		...
+		>
+```
+
 ### Usage
 Use same of AlertDialog.
 
-    ```java
-		new FilePickerDialog.Builder (this)
-				.setRequestCode(EXTERNAL_READ_PERMISSION_GRANT)
-				.setTitle("Select a File")
-				.setOffsetDir(FilePickerDialog.DEFAULT_DIR)
-				.setRootDir(FilePickerDialog.DEFAULT_DIR)
-				.setErrorDir(FilePickerDialog.DEFAULT_DIR)
-				.setSelectionType(FilePickerDialog.FILE_SELECT)
-				.setOnSingleChoiceValidationListener(
-					new PickerInterface.OnSingleChoiceValidationListener<String>() {
-						@Override
-						public void onClick ( PickerInterface sender, String result ) {
-							//file is the path of file selected by the Application User.
-						}
-					})
-				.show();
-    ```
+```java
+	new FilePickerDialog.Builder (this)
+			.setRequestCode(EXTERNAL_READ_PERMISSION_GRANT)
+			.setTitle("Select a File")
+			.setOffsetDir(FilePickerDialog.DEFAULT_DIR)
+			.setRootDir(FilePickerDialog.DEFAULT_DIR)
+			.setErrorDir(FilePickerDialog.DEFAULT_DIR)
+			.setSelectionType(FilePickerDialog.FILE_SELECT)
+			.setOnSingleChoiceValidationListener(
+				new PickerInterface.OnSingleChoiceValidationListener<String>() {
+					@Override
+					public void onClick ( PickerInterface sender, String result ) {
+						//file is the path of file selected by the Application User.
+					}
+				})
+			.show();
+```
 
 ### NOTE:
 Marshmallow and above requests for the permission on runtime. You should override `onRequestPermissionsResult` in Activity/AppCompatActivity class and show the dialog only if permissions have been granted.
