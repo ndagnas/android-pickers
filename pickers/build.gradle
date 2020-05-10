@@ -22,14 +22,21 @@ ext {
     licenseName = 'The Apache Software License, Version 2.0'
     licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
     allLicenses = ["Apache-2.0"]
+	
+	bintrayUsername = ""
+	bintrayApiKey = ""
+	bintrayUserOrg = ""
 
-    Properties properties = new Properties()
-    properties.load(project.rootProject.file('local.properties').newDataInputStream())
+	if (project.rootProject.file('local.properties').exists()) {
+		Properties properties = new Properties()
+		properties.load(project.rootProject.file('local.properties').newDataInputStream())
 
-    //Bintray Credentials
-    bintrayUsername = properties.getProperty("bintray.user") // Your Bintray username
-    bintrayApiKey = properties.getProperty("bintray.apikey") // API Key you copied in previous step
-    bintrayUserOrg = properties.getProperty("bintray.userorg") // Organization you created in Bintray
+		//Bintray Credentials
+		bintrayUsername = properties.getProperty("bintray.user") // Your Bintray username
+		bintrayApiKey = properties.getProperty("bintray.apikey") // API Key you copied in previous step
+		bintrayUserOrg = properties.getProperty("bintray.userorg") // Organization you created in Bintray
+	}
+
 }
 
 android {
@@ -56,5 +63,7 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.1.0'
 }
 
-apply from: 'https://raw.githubusercontent.com/ndagnas/JCenter/master/installv1.gradle'
-apply from: 'https://raw.githubusercontent.com/ndagnas/JCenter/master/bintrayv1.gradle'
+if (project.rootProject.file('local.properties').exists()) {
+	apply from: 'https://raw.githubusercontent.com/ndagnas/JCenter/master/installv1.gradle'
+	apply from: 'https://raw.githubusercontent.com/ndagnas/JCenter/master/bintrayv1.gradle'
+}
