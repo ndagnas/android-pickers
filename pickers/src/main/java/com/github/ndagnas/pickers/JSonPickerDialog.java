@@ -21,6 +21,7 @@ package com.github.ndagnas.pickers;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
@@ -39,9 +40,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 
-/** Defines a json picker dialog. *** */
+/** Defines a json picker dialog. */
 @SuppressWarnings({"unused", "WeakerAccess"})
 public class JSonPickerDialog extends ListPickerDialogBase implements PickerInterface {
+
+    /* SELECTION_TYPES */
+
     /**
      * NODE_WITHOUT_CHILDREN_SELECT specifies that from list of json nodes without child has to be
      * selected. It is the default Selection Type.
@@ -77,14 +81,20 @@ public class JSonPickerDialog extends ListPickerDialogBase implements PickerInte
         public JSONItem(JSONObject object, JSONItem parent) {
             this.object = object;
             this.parent = parent;
+            this.listViewState = null;
         }
 
         /** Json node object. */
         public JSONObject object;
 
+        /** List view state. */
+        public Parcelable listViewState;
+
         /** Json node parent. */
         public JSONItem parent;
     }
+
+    // Constants
 
     private static java.util.Locale DEF_LOCAL = java.util.Locale.getDefault();
 
@@ -259,7 +269,6 @@ public class JSonPickerDialog extends ListPickerDialogBase implements PickerInte
                             }
 
                             return -1 * reversed;
-                            // --------------------------------------------------------------------------------------------------------------------------------
                         }
                     };
         }
@@ -283,6 +292,9 @@ public class JSonPickerDialog extends ListPickerDialogBase implements PickerInte
                 JSONItem jsonTag = (JSONItem) itemTag;
 
                 if (jsonTag.parent != null) {
+                    if (!(item instanceof BackItem))
+                        jsonTag.parent.listViewState = super.getListViewState();
+
                     String backItemTitle =
                             (TextUtils.isEmpty(this.mBackItemTitle))
                                     ? this.mContext.getString(
@@ -293,6 +305,7 @@ public class JSonPickerDialog extends ListPickerDialogBase implements PickerInte
                             this.mContext.getString(R.string.json_picker_dialog_parent_directory),
                             backItemTitle,
                             R.drawable.ic_json_picker_back,
+                            jsonTag.parent.listViewState,
                             jsonTag.parent);
                 }
             }
@@ -556,7 +569,9 @@ public class JSonPickerDialog extends ListPickerDialogBase implements PickerInte
     /** Provide a builder for a json picker dialog. */
     @SuppressWarnings("UnusedReturnValue")
     public static class Builder {
+
         // Attributes
+
         private final PickerParams P;
         private int mSelectionType = JSonPickerDialog.ALL_NODE_SELECT;
         private CharSequence mTitleNodeName;

@@ -25,7 +25,9 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -47,11 +49,12 @@ import androidx.annotation.StyleRes;
 import java.util.ArrayList;
 import java.util.Collection;
 
-/** Defines a base picker dialog. *** */
+/** Defines a base picker dialog. */
 @SuppressWarnings({"unused", "WeakerAccess"})
 public class ListPickerDialogBase extends Dialog {
     /** Defines a base item for picker. */
     public class ItemBase {
+
         // Attributes
 
         private final int mIconId;
@@ -144,18 +147,23 @@ public class ListPickerDialogBase extends Dialog {
 
     /** Defines a item for back action. */
     public class BackItem extends ItemBase {
+
+        // Attributes
+
+        private final Parcelable mListViewState;
+
         /**
          * Object initialisation.
          *
          * @param title text displayed in the title of the item.
          * @param subTitle text displayed in the sub-title of the item.
-         * @param mIconId resource id of the icon displayed on the left of the item.
+         * @param iconId resource id of the icon displayed on the left of the item.
          */
         public BackItem(
                 @NonNull CharSequence title,
                 @Nullable CharSequence subTitle,
-                @DrawableRes int mIconId) {
-            super(title, subTitle, mIconId);
+                @DrawableRes int iconId) {
+            this(title, subTitle, iconId, null);
         }
 
         /**
@@ -163,15 +171,52 @@ public class ListPickerDialogBase extends Dialog {
          *
          * @param title text displayed in the title of the item.
          * @param subTitle text displayed in the sub-title of the item.
-         * @param mIconId resource id of the icon displayed on the left of the item.
+         * @param iconId resource id of the icon displayed on the left of the item.
+         * @param listViewState list view state.
+         */
+        public BackItem(
+                @NonNull CharSequence title,
+                @Nullable CharSequence subTitle,
+                @DrawableRes int iconId,
+                Parcelable listViewState) {
+            super(title, subTitle, iconId);
+
+            this.mListViewState = listViewState;
+        }
+
+        /**
+         * Object initialisation.
+         *
+         * @param title text displayed in the title of the item.
+         * @param subTitle text displayed in the sub-title of the item.
+         * @param iconId resource id of the icon displayed on the left of the item.
          * @param tag object associate with the item.
          */
         public BackItem(
                 @NonNull CharSequence title,
                 @Nullable CharSequence subTitle,
-                @DrawableRes int mIconId,
+                @DrawableRes int iconId,
                 Object tag) {
-            super(title, subTitle, mIconId, tag);
+            this(title, subTitle, iconId, null, tag);
+        }
+
+        /**
+         * Object initialisation.
+         *
+         * @param title text displayed in the title of the item.
+         * @param subTitle text displayed in the sub-title of the item.
+         * @param iconId resource id of the icon displayed on the left of the item.
+         * @param tag object associate with the item.
+         */
+        public BackItem(
+                @NonNull CharSequence title,
+                @Nullable CharSequence subTitle,
+                @DrawableRes int iconId,
+                Parcelable listViewState,
+                Object tag) {
+            super(title, subTitle, iconId, tag);
+
+            this.mListViewState = listViewState;
         }
     }
 
@@ -186,15 +231,15 @@ public class ListPickerDialogBase extends Dialog {
          *
          * @param title text displayed in the title of the item.
          * @param subTitle text displayed in the sub-title of the item.
-         * @param mIconId resource id of the icon displayed on the left of the item.
+         * @param iconId resource id of the icon displayed on the left of the item.
          * @param hasChildren indicates if the item has children.
          */
         public PickerItem(
                 @NonNull CharSequence title,
                 @Nullable CharSequence subTitle,
-                @DrawableRes int mIconId,
+                @DrawableRes int iconId,
                 boolean hasChildren) {
-            super(title, subTitle, mIconId);
+            super(title, subTitle, iconId);
 
             this.mHasChildren = hasChildren;
         }
@@ -204,17 +249,17 @@ public class ListPickerDialogBase extends Dialog {
          *
          * @param title text displayed in the title of the item.
          * @param subTitle text displayed in the sub-title of the item.
-         * @param mIconId resource id of the icon displayed on the left of the item.
+         * @param iconId resource id of the icon displayed on the left of the item.
          * @param tag object associate with the item.
          * @param hasChildren indicates if the item has children.
          */
         public PickerItem(
                 @NonNull CharSequence title,
                 @Nullable CharSequence subTitle,
-                @DrawableRes int mIconId,
+                @DrawableRes int iconId,
                 Object tag,
                 boolean hasChildren) {
-            super(title, subTitle, mIconId, tag);
+            super(title, subTitle, iconId, tag);
 
             this.mHasChildren = hasChildren;
         }
@@ -231,6 +276,7 @@ public class ListPickerDialogBase extends Dialog {
 
     /** Defines a item for navigation. */
     public class PickableItem extends PickerItem {
+
         // Attributes
 
         private boolean mIsPicked = false;
@@ -240,13 +286,13 @@ public class ListPickerDialogBase extends Dialog {
          *
          * @param title text displayed in the title of the item.
          * @param subTitle text displayed in the sub-title of the item.
-         * @param mIconId resource id of the icon displayed on the left of the item.
+         * @param iconId resource id of the icon displayed on the left of the item.
          */
         public PickableItem(
                 @NonNull CharSequence title,
                 @Nullable CharSequence subTitle,
-                @DrawableRes int mIconId) {
-            super(title, subTitle, mIconId, false);
+                @DrawableRes int iconId) {
+            super(title, subTitle, iconId, false);
         }
 
         /**
@@ -254,15 +300,15 @@ public class ListPickerDialogBase extends Dialog {
          *
          * @param title text displayed in the title of the item.
          * @param subTitle text displayed in the sub-title of the item.
-         * @param mIconId resource id of the icon displayed on the left of the item.
+         * @param iconId resource id of the icon displayed on the left of the item.
          * @param hasChildren indicates if the item has children.
          */
         public PickableItem(
                 @NonNull CharSequence title,
                 @Nullable CharSequence subTitle,
-                @DrawableRes int mIconId,
+                @DrawableRes int iconId,
                 boolean hasChildren) {
-            super(title, subTitle, mIconId, hasChildren);
+            super(title, subTitle, iconId, hasChildren);
         }
 
         /**
@@ -270,15 +316,15 @@ public class ListPickerDialogBase extends Dialog {
          *
          * @param title text displayed in the title of the item.
          * @param subTitle text displayed in the sub-title of the item.
-         * @param mIconId resource id of the icon displayed on the left of the item.
+         * @param iconId resource id of the icon displayed on the left of the item.
          * @param tag object associate with the item.
          */
         public PickableItem(
                 @NonNull CharSequence title,
                 @Nullable CharSequence subTitle,
-                @DrawableRes int mIconId,
+                @DrawableRes int iconId,
                 Object tag) {
-            super(title, subTitle, mIconId, tag, false);
+            super(title, subTitle, iconId, tag, false);
         }
 
         /**
@@ -286,17 +332,17 @@ public class ListPickerDialogBase extends Dialog {
          *
          * @param title text displayed in the title of the item.
          * @param subTitle text displayed in the sub-title of the item.
-         * @param mIconId resource id of the icon displayed on the left of the item.
+         * @param iconId resource id of the icon displayed on the left of the item.
          * @param tag object associate with the item.
          * @param hasChildren indicates if the item has children.
          */
         public PickableItem(
                 @NonNull CharSequence title,
                 @Nullable CharSequence subTitle,
-                @DrawableRes int mIconId,
+                @DrawableRes int iconId,
                 Object tag,
                 boolean hasChildren) {
-            super(title, subTitle, mIconId, tag, hasChildren);
+            super(title, subTitle, iconId, tag, hasChildren);
         }
 
         /**
@@ -320,6 +366,7 @@ public class ListPickerDialogBase extends Dialog {
 
     /** Defines a ViewItem for Adapter. */
     static class ItemViewHolder {
+
         // Attributes
 
         private final View SelfView;
@@ -376,6 +423,7 @@ public class ListPickerDialogBase extends Dialog {
 
     /** Defines a adapter object use in ListView. */
     static class PickerAdapter extends BaseAdapter {
+
         // Attributes
 
         private final ListPickerDialogBase mOwner;
@@ -580,7 +628,11 @@ public class ListPickerDialogBase extends Dialog {
         }
     }
 
+    // Constants
+
     private static java.util.Locale DEF_LOCAL = java.util.Locale.getDefault();
+
+    // Attributes
 
     private final ListPickerDialogBase mSelf;
     private final int mIconId;
@@ -799,12 +851,26 @@ public class ListPickerDialogBase extends Dialog {
 
             this.actualizeTitle();
 
+            Collection<PickerItem> items = this.getChildrenFor(rootItem);
+
             this.mListView.setAdapter(null);
 
-            this.mAdapter.replaceAll(this.mBackItem, this.getChildrenFor(rootItem));
+            this.mAdapter.replaceAll(this.mBackItem, items);
 
             this.mListView.setAdapter(this.mAdapter);
+            if (rootItem instanceof BackItem) {
+                BackItem backItem = (BackItem) rootItem;
 
+                if (backItem.mListViewState != null) {
+                    try {
+                        this.mListView.onRestoreInstanceState(backItem.mListViewState);
+                    } catch (Exception Err) {
+                        Log.e(
+                                "ListPickerDialogBase.navigateToItem",
+                                "Exception: " + Err.toString());
+                    }
+                }
+            }
             this.actualizePositiveButtonText();
         }
     }
@@ -896,6 +962,15 @@ public class ListPickerDialogBase extends Dialog {
 
     /* ---- Protected Methods ---- */
 
+    /**
+     * Get list view state.
+     *
+     * @return a list view state.
+     */
+    protected Parcelable getListViewState() {
+        return (this.mListView != null) ? this.mListView.onSaveInstanceState() : null;
+    }
+
     /** Reload the list. */
     protected void reload() {
         if (this.mRootItem == null) this.navigateToItem(this.getRootItem());
@@ -904,6 +979,7 @@ public class ListPickerDialogBase extends Dialog {
 
     /** Provide a controller for a list picker dialog. */
     protected static class PickerParams {
+
         // Attributes
 
         /** Theme id for dialog. */

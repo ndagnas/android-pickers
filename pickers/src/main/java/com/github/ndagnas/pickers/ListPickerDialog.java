@@ -31,9 +31,12 @@ import androidx.annotation.StyleRes;
 
 import java.util.Collection;
 
-/** Defines a file picker dialog. *** */
+/** Defines a file picker dialog. */
 @SuppressWarnings({"unused"})
 public class ListPickerDialog extends ListPickerDialogBase implements PickerInterface {
+
+    // Constants
+
     private static java.util.Locale DEF_LOCAL = java.util.Locale.getDefault();
 
     // Attributes
@@ -129,10 +132,10 @@ public class ListPickerDialog extends ListPickerDialogBase implements PickerInte
     /** Provide a builder for a list picker dialog. */
     @SuppressWarnings("UnusedReturnValue")
     public static class Builder {
+
         // Attributes
 
         private final PickerParams P;
-
         private ListPickerDialogListener mListener;
 
         /**
@@ -151,6 +154,7 @@ public class ListPickerDialog extends ListPickerDialogBase implements PickerInte
          * @param themeResId the resource ID of the theme against which to inflate this dialog, or
          *     {@code 0} to use the parent {@code context}'s default dialog dialog theme
          */
+        @SuppressWarnings("WeakerAccess")
         public Builder(@NonNull Context context, @StyleRes int themeResId) {
             this.P = new PickerParams(context, themeResId);
 

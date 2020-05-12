@@ -29,6 +29,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
+import android.os.Parcelable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -59,6 +60,8 @@ import java.util.regex.Pattern;
 /** Defines a file picker dialog. */
 @SuppressWarnings({"unused", "WeakerAccess"})
 public class FilePickerDialog extends ListPickerDialogBase implements PickerInterface {
+
+    /* SELECTION_TYPES */
 
     /**
      * FILE_SELECT specifies that from list of Files/Directories a File has to be selected. It is
@@ -98,9 +101,33 @@ public class FilePickerDialog extends ListPickerDialogBase implements PickerInte
     /** SORT_ORDER_NORMAL specifies that list of Files/Directories is sorted by reverse order. */
     public static final int SORT_ORDER_REVERSE = 1;
 
+    /** Defines an item of the list. */
+    static class FileItem {
+        /**
+         * Object initialisation.
+         *
+         * @param object json node object.
+         */
+        public FileItem(File object, FileItem parent) {
+            this.object = object;
+            this.parent = parent;
+            this.listViewState = null;
+        }
+
+        /** Json node object. */
+        public File object;
+
+        /** List view state. */
+        public Parcelable listViewState;
+
+        /** Json node parent. */
+        public FileItem parent;
+    }
+
     /** Class to filter the list of files. */
     static class ExtensionFilter implements FileFilter {
         // Attributes
+
         private final FilePickerDialog mDialog;
 
         /**
@@ -144,6 +171,8 @@ public class FilePickerDialog extends ListPickerDialogBase implements PickerInte
         }
     }
 
+    // Constants
+
     private static java.util.Locale DEF_LOCAL = java.util.Locale.getDefault();
 
     // Attributes
@@ -161,7 +190,7 @@ public class FilePickerDialog extends ListPickerDialogBase implements PickerInte
     private final OnSingleChoiceValidationListener<String> mOnSingleChoiceValidationListener;
     private final OnMultiChoiceValidationListener<String> mOnMultiChoiceValidationListener;
     private final ExtensionFilter mFilter;
-    private Comparator<File> mSorter;
+    private Comparator<FileItem> mSorter;
     private LinearLayout mToolbarView = null;
     private TextView mNameColumn = null;
     private TextView mDateColumn = null;
@@ -224,41 +253,49 @@ public class FilePickerDialog extends ListPickerDialogBase implements PickerInte
                         "android.permission.READ_EXTERNAL_STORAGE")
                 == PackageManager.PERMISSION_GRANTED);
     }
+
     /**
      * Create comparator for sort objects in list.
      *
      * @return A comparator object for sort list.
      */
-    private static Comparator<File> createComparator(FilePickerDialog dialog) {
-        final Comparator<File> comparator;
+    private static Comparator<FileItem> createComparator(FilePickerDialog dialog) {
+        final Comparator<FileItem> comparator;
 
         final int reversed = ((dialog.mSortOrder == FilePickerDialog.SORT_ORDER_REVERSE) ? -1 : 1);
-
         switch (dialog.mSortBy) {
             case FilePickerDialog.SORT_BY_LAST_MODIFIED:
                 {
                     comparator =
-                            new Comparator<File>() {
+                            new Comparator<FileItem>() {
                                 @Override
-                                public int compare(File lht, File rht) {
-                                    if (rht.isDirectory() && lht.isDirectory()) {
-                                        if (lht.getName().equals("...")) return -1 * reversed;
-                                        if (rht.getName().equals("...")) return reversed;
+                                public int compare(FileItem lht, FileItem rht) {
+                                    if (rht.object.isDirectory() && lht.object.isDirectory()) {
+                                        if (lht.object.getName().equals("..."))
+                                            return -1 * reversed;
+                                        if (rht.object.getName().equals("...")) return reversed;
 
-                                        return Long.compare(lht.lastModified(), rht.lastModified())
+                                        return Long.compare(
+                                                        lht.object.lastModified(),
+                                                        rht.object.lastModified())
                                                 * reversed;
                                     }
 
                                     // If the comparison is not between two directories, return the
                                     // file with alphabetic order first.
 
-                                    if (!rht.isDirectory() && !lht.isDirectory()) {
+                                    if (!rht.object.isDirectory() && !lht.object.isDirectory()) {
                                         int result =
-                                                Long.compare(lht.lastModified(), rht.lastModified())
+                                                Long.compare(
+                                                                lht.object.lastModified(),
+                                                                rht.object.lastModified())
                                                         * reversed;
 
                                         if (result == 0)
-                                            return lht.getName().compareToIgnoreCase(rht.getName())
+                                            return lht.object
+                                                            .getName()
+                                                            .compareToIgnoreCase(
+                                                                    rht.object.getName())
                                                     * reversed;
 
                                         return result;
@@ -267,9 +304,10 @@ public class FilePickerDialog extends ListPickerDialogBase implements PickerInte
                                     // If the comparison is between a directory and a file, return
                                     // the directory.
 
-                                    if (lht.isDirectory() && !rht.isDirectory())
+                                    if (lht.object.isDirectory() && !rht.object.isDirectory())
                                         return -1 * reversed;
-                                    if (!lht.isDirectory() && rht.isDirectory()) return reversed;
+                                    if (!lht.object.isDirectory() && rht.object.isDirectory())
+                                        return reversed;
 
                                     // Same as above but order of occurrence is different.
 
@@ -282,27 +320,35 @@ public class FilePickerDialog extends ListPickerDialogBase implements PickerInte
             case FilePickerDialog.SORT_BY_SIZE:
                 {
                     comparator =
-                            new Comparator<File>() {
-                                @SuppressWarnings("DuplicateExpressions")
+                            new Comparator<FileItem>() {
                                 @Override
-                                public int compare(File lht, File rht) {
-                                    if (rht.isDirectory() && lht.isDirectory()) {
-                                        if (lht.getName().equals("...")) return -1 * reversed;
-                                        if (rht.getName().equals("...")) return reversed;
+                                public int compare(FileItem lht, FileItem rht) {
+                                    if (rht.object.isDirectory() && lht.object.isDirectory()) {
+                                        if (lht.object.getName().equals("..."))
+                                            return -1 * reversed;
+                                        if (rht.object.getName().equals("...")) return reversed;
 
-                                        return lht.getName().compareToIgnoreCase(rht.getName())
+                                        return lht.object
+                                                        .getName()
+                                                        .compareToIgnoreCase(rht.object.getName())
                                                 * reversed;
                                     }
 
                                     // If the comparison is not between two directories, return the
                                     // file with alphabetic order first.
 
-                                    if (!rht.isDirectory() && !lht.isDirectory()) {
+                                    if (!rht.object.isDirectory() && !lht.object.isDirectory()) {
                                         int result =
-                                                Long.compare(lht.length(), rht.length()) * reversed;
+                                                Long.compare(
+                                                                lht.object.length(),
+                                                                rht.object.length())
+                                                        * reversed;
 
                                         if (result == 0)
-                                            return lht.getName().compareToIgnoreCase(rht.getName())
+                                            return lht.object
+                                                            .getName()
+                                                            .compareToIgnoreCase(
+                                                                    rht.object.getName())
                                                     * reversed;
 
                                         return result;
@@ -311,9 +357,10 @@ public class FilePickerDialog extends ListPickerDialogBase implements PickerInte
                                     // If the comparison is between a directory and a file, return
                                     // the directory.
 
-                                    if (lht.isDirectory() && !rht.isDirectory())
+                                    if (lht.object.isDirectory() && !rht.object.isDirectory())
                                         return -1 * reversed;
-                                    if (!lht.isDirectory() && rht.isDirectory()) return reversed;
+                                    if (!lht.object.isDirectory() && rht.object.isDirectory())
+                                        return reversed;
 
                                     // Same as above but order of occurrence is different.
 
@@ -326,31 +373,36 @@ public class FilePickerDialog extends ListPickerDialogBase implements PickerInte
             default:
                 {
                     comparator =
-                            new Comparator<File>() {
-                                @SuppressWarnings("DuplicateExpressions")
+                            new Comparator<FileItem>() {
                                 @Override
-                                public int compare(File lht, File rht) {
-                                    if (rht.isDirectory() && lht.isDirectory()) {
-                                        if (lht.getName().equals("...")) return -1 * reversed;
-                                        if (rht.getName().equals("...")) return reversed;
+                                public int compare(FileItem lht, FileItem rht) {
+                                    if (rht.object.isDirectory() && lht.object.isDirectory()) {
+                                        if (lht.object.getName().equals("..."))
+                                            return -1 * reversed;
+                                        if (rht.object.getName().equals("...")) return reversed;
 
-                                        return lht.getName().compareToIgnoreCase(rht.getName())
+                                        return lht.object
+                                                        .getName()
+                                                        .compareToIgnoreCase(rht.object.getName())
                                                 * reversed;
                                     }
 
                                     // If the comparison is not between two directories, return the
                                     // file with alphabetic order first.
 
-                                    if (!rht.isDirectory() && !lht.isDirectory())
-                                        return lht.getName().compareToIgnoreCase(rht.getName())
+                                    if (!rht.object.isDirectory() && !lht.object.isDirectory())
+                                        return lht.object
+                                                        .getName()
+                                                        .compareToIgnoreCase(rht.object.getName())
                                                 * reversed;
 
                                     // If the comparison is between a directory and a file, return
                                     // the directory.
 
-                                    if (lht.isDirectory() && !rht.isDirectory())
+                                    if (lht.object.isDirectory() && !rht.object.isDirectory())
                                         return -1 * reversed;
-                                    if (!lht.isDirectory() && rht.isDirectory()) return reversed;
+                                    if (!lht.object.isDirectory() && rht.object.isDirectory())
+                                        return reversed;
 
                                     // Same as above but order of occurrence is different.
 
@@ -481,7 +533,6 @@ public class FilePickerDialog extends ListPickerDialogBase implements PickerInte
                 });
 
         // Size column
-
         RelativeLayout sizeButton =
                 this.mToolbarView.findViewById(R.id.file_picker_dialog_sort_size);
 
@@ -505,6 +556,7 @@ public class FilePickerDialog extends ListPickerDialogBase implements PickerInte
                         FilePickerDialog.this.reload();
                     }
                 });
+
         return toolbar;
     }
 
@@ -521,24 +573,36 @@ public class FilePickerDialog extends ListPickerDialogBase implements PickerInte
         if (item != null) {
             Object itemTag = item.getTag();
 
-            if (itemTag instanceof File) {
-                File path = (File) itemTag;
+            if (itemTag instanceof FileItem) {
+                FileItem fileItem = (FileItem) itemTag;
 
-                if (path.isDirectory() && path.canRead()) {
+                if (fileItem.object.isDirectory() && fileItem.object.canRead()) {
                     String rootPath = this.mRootDir.getAbsolutePath();
-                    String otherPath = path.getAbsolutePath();
+                    String otherPath = fileItem.object.getAbsolutePath();
 
                     if (!otherPath.equals(rootPath) && otherPath.startsWith(rootPath)) {
-                        File parent = ((File) itemTag).getParentFile();
+                        FileItem parentItem = fileItem.parent;
 
-                        if (parent != null && parent.canRead()) {
+                        if (parentItem == null || !parentItem.object.canRead()) {
+                            File parent = fileItem.object.getParentFile();
+
+                            if (parent != null && parent.canRead()) {
+                                parentItem = new FileItem(parent, null);
+                            }
+                        }
+
+                        if (parentItem != null) {
+                            if (!(item instanceof BackItem))
+                                parentItem.listViewState = super.getListViewState();
+
                             return new BackItem(
                                     this.mContext.getString(
                                             R.string.file_picker_dialog_parent_directory),
                                     this.mContext.getString(
                                             R.string.file_picker_dialog_parent_directory_text),
                                     R.drawable.ic_file_picker_folder,
-                                    parent);
+                                    parentItem.listViewState,
+                                    parentItem);
                         }
                     }
                 }
@@ -561,26 +625,27 @@ public class FilePickerDialog extends ListPickerDialogBase implements PickerInte
         if (item != null) {
             Object itemTag = item.getTag();
 
-            if (itemTag instanceof File) {
-                File path = (File) itemTag;
+            if (itemTag instanceof FileItem) {
+                FileItem fileItem = (FileItem) itemTag;
 
-                if (path.isDirectory() && path.canRead()) {
+                if (fileItem.object.isDirectory() && fileItem.object.canRead()) {
                     String rootPath = this.mRootDir.getAbsolutePath();
-                    String otherPath = path.getAbsolutePath();
+                    String otherPath = fileItem.object.getAbsolutePath();
 
                     if (otherPath.equals(rootPath) || otherPath.startsWith(rootPath)) {
-                        File[] files = ((File) itemTag).listFiles(this.mFilter);
+                        File[] files = fileItem.object.listFiles(this.mFilter);
 
-                        ArrayList<File> sortedObjects = new ArrayList<>();
+                        ArrayList<FileItem> sortedObjects = new ArrayList<>();
 
                         if (files != null) {
                             for (File file : files) {
-                                if (!file.isHidden() && file.canRead()) sortedObjects.add(file);
+                                if (!file.isHidden() && file.canRead())
+                                    sortedObjects.add(new FileItem(file, fileItem));
                             }
 
                             Collections.sort(sortedObjects, this.mSorter);
 
-                            for (File newObject : sortedObjects) {
+                            for (FileItem newObject : sortedObjects) {
                                 itemList.add(this.createItem(newObject));
                             }
                         }
@@ -611,14 +676,15 @@ public class FilePickerDialog extends ListPickerDialogBase implements PickerInte
                 String offsetPath = this.mOffsetDir.getAbsolutePath();
 
                 if (offsetPath.equals(rootPath) || offsetPath.startsWith(rootPath)) {
-                    if (this.mOffsetDir.canRead()) return this.createItem(this.mOffsetDir);
+                    if (this.mOffsetDir.canRead())
+                        return this.createItem(new FileItem(this.mOffsetDir, null));
                 }
             }
 
             if (this.mRootDir.isDirectory() && this.mRootDir.canRead())
-                return this.createItem(this.mRootDir);
+                return this.createItem(new FileItem(this.mRootDir, null));
             if (this.mErrorDir.isDirectory() && this.mErrorDir.canRead())
-                return this.createItem(this.mErrorDir);
+                return this.createItem(new FileItem(this.mErrorDir, null));
         }
 
         Toast.makeText(
@@ -641,11 +707,14 @@ public class FilePickerDialog extends ListPickerDialogBase implements PickerInte
         if (item != null) {
             Object itemTag = item.getTag();
 
-            if (itemTag instanceof File)
+            if (itemTag instanceof FileItem) {
+                FileItem fileItem = (FileItem) itemTag;
+
                 return new ItemBase(
-                        ((File) itemTag).getName(),
-                        ((File) itemTag).getAbsolutePath(),
+                        fileItem.object.getName(),
+                        fileItem.object.getAbsolutePath(),
                         R.drawable.ic_file_picker_header);
+            }
         }
 
         return null;
@@ -693,7 +762,8 @@ public class FilePickerDialog extends ListPickerDialogBase implements PickerInte
             for (PickableItem item : items) {
                 Object itemTag = item.getTag();
 
-                if (itemTag instanceof File) result.add(((File) itemTag).getAbsolutePath());
+                if (itemTag instanceof FileItem)
+                    result.add(((FileItem) itemTag).object.getAbsolutePath());
             }
 
             if (this.mOnSingleChoiceValidationListener != null)
@@ -709,16 +779,16 @@ public class FilePickerDialog extends ListPickerDialogBase implements PickerInte
     /**
      * Create picker item corresponding to the specified file.
      *
-     * @param file file.
+     * @param fileItem fileItem.
      * @return a picker item corresponding to the specified file.
      */
-    private PickerItem createItem(File file) {
+    private PickerItem createItem(FileItem fileItem) {
         String strDateFormat = this.mContext.getString(R.string.file_picker_dialog_date_format);
 
         SimpleDateFormat dateFormat = new SimpleDateFormat(strDateFormat, Locale.getDefault());
 
-        String itemDate = dateFormat.format(new Date(file.lastModified()));
-        if (file.isDirectory()) {
+        String itemDate = dateFormat.format(new Date(fileItem.object.lastModified()));
+        if (fileItem.object.isDirectory()) {
             String Label = this.mContext.getString(R.string.file_picker_dialog_last_edit_directory);
 
             String subTitle = String.format(Locale.getDefault(), Label, itemDate);
@@ -727,20 +797,32 @@ public class FilePickerDialog extends ListPickerDialogBase implements PickerInte
                 case FilePickerDialog.DIR_SELECT:
                 case FilePickerDialog.FILE_AND_DIR_SELECT:
                     return new PickableItem(
-                            file.getName(), subTitle, R.drawable.ic_file_picker_folder, file, true);
+                            fileItem.object.getName(),
+                            subTitle,
+                            R.drawable.ic_file_picker_folder,
+                            fileItem,
+                            true);
                 default:
                     return new PickerItem(
-                            file.getName(), subTitle, R.drawable.ic_file_picker_folder, file, true);
+                            fileItem.object.getName(),
+                            subTitle,
+                            R.drawable.ic_file_picker_folder,
+                            fileItem,
+                            true);
             }
         } else {
             String Label = this.mContext.getString(R.string.file_picker_dialog_last_edit_file);
 
-            String fileSize = this.formatSize(file.length());
+            String fileSize = this.formatSize(fileItem.object.length());
 
             String subTitle = String.format(DEF_LOCAL, Label, fileSize, itemDate);
 
             return new PickableItem(
-                    file.getName(), subTitle, R.drawable.ic_file_picker_file, file, false);
+                    fileItem.object.getName(),
+                    subTitle,
+                    R.drawable.ic_file_picker_file,
+                    fileItem,
+                    false);
         }
     }
 
@@ -756,6 +838,7 @@ public class FilePickerDialog extends ListPickerDialogBase implements PickerInte
 
             mSizeDecimalFormat.setDecimalFormatSymbols(DecimalFormatSymbols.getInstance(Locale.US));
         }
+
         String[] units =
                 super.getContext()
                         .getResources()
@@ -774,6 +857,7 @@ public class FilePickerDialog extends ListPickerDialogBase implements PickerInte
     /** Provide a builder for a file picker dialog. */
     @SuppressWarnings("UnusedReturnValue")
     public static class Builder {
+
         // Attributes
 
         private final PickerParams P;

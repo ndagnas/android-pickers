@@ -23,7 +23,7 @@ import android.view.View;
 
 import java.util.Collection;
 
-/** Defines a file picker validation listeners. *** */
+/** Defines a file picker validation listeners. */
 @SuppressWarnings({"unused"})
 public interface PickerInterface {
     /** Defines a listener to be use picker dialog. */
