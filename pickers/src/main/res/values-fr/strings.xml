@@ -5,7 +5,7 @@
 
    <string name="file_picker_dialog_error_dir_access">L\'annuaire ne peut pas être consulté</string>
    <string name="file_picker_dialog_parent_directory_text">Répertoire parent</string>
-   <string name="file_picker_dialog_last_edit_file">%s - Modifié le : %s</string>
+   <string name="file_picker_dialog_last_edit_file" formatted="false">%s - Modifié le : %s</string>
    <string name="file_picker_dialog_last_edit_directory">Modifié le : %s</string>
    <string name="file_picker_dialog_sort_name">Nom</string>
    <string name="file_picker_dialog_sort_date">Date</string>

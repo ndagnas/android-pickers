@@ -8,7 +8,7 @@ Android Library to create picker dialogs.
 [Angad Singh - filepicker](https://www.github.com/angads25/android-filepicker) and [Aefyr - filepicker](https://www.github.com/Aefyr/android-filepicker)
 
 ### Where to Find
-[![API](https://img.shields.io/badge/API-23%2B-brightgreen.svg?style=flat)](https://android-arsenal.com/api?level=23) [ ![Download](https://api.bintray.com/packages/ndagnas/maven/Picker-Dialogs/images/download.svg) ](https://bintray.com/ndagnas/maven/Picker-Dialogs/_latestVersion)
+[![API](https://img.shields.io/badge/API-23%2B-brightgreen.svg?style=flat)](https://android-arsenal.com/api?level=23)
 
 ### Picker Dialog Base Features
 * Easy to Implement.
@@ -39,7 +39,7 @@ Android Library to create picker dialogs.
 ```
 
 ```gradle
-    compile 'com.github.ndagnas:pickers:0.2.4'
+    compile 'com.github.ndagnas:pickers:0.2.5'
 ```
 
 ### Autorisation (Android 10 or more)

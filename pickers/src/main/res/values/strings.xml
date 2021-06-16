@@ -8,7 +8,7 @@
    <string name="file_picker_dialog_parent_directory" translatable="false">...</string>
    <string name="file_picker_dialog_parent_directory_text">Parent Directory</string>
    <string name="file_picker_dialog_date_format">dd.MM.yyyy, HH:mm</string>
-   <string name="file_picker_dialog_last_edit_file">%s - Last edited: %s</string>
+   <string name="file_picker_dialog_last_edit_file" formatted="false">%s - Last edited: %s</string>
    <string name="file_picker_dialog_last_edit_directory">Last edited: %s</string>
    <string name="file_picker_dialog_sort_name">Name</string>
    <string name="file_picker_dialog_sort_date">Date</string>

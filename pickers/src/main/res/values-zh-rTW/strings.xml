@@ -5,7 +5,7 @@
 
    <string name="file_picker_dialog_error_dir_access">無法訪問目錄</string>
    <string name="file_picker_dialog_parent_directory_text">上層資料夾</string>
-   <string name="file_picker_dialog_last_edit_file">%s - 最後修改: %s</string>
+   <string name="file_picker_dialog_last_edit_file" formatted="false">%s - 最後修改: %s</string>
    <string name="file_picker_dialog_last_edit_directory">最後修改: %s</string>
    <string name="file_picker_dialog_sort_name">名称</string>
    <string name="file_picker_dialog_sort_date">日期</string>

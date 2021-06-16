@@ -5,7 +5,7 @@
 
    <string name="file_picker_dialog_error_dir_access">No se puede acceder al directorio</string>
    <string name="file_picker_dialog_parent_directory_text">Directorio Padre</string>
-   <string name="file_picker_dialog_last_edit_file">%s - Modificado en: %s</string>
+   <string name="file_picker_dialog_last_edit_file" formatted="false">%s - Modificado en: %s</string>
    <string name="file_picker_dialog_last_edit_directory">Modificado en: %s</string>
    <string name="file_picker_dialog_sort_name">Nombre</string>
    <string name="file_picker_dialog_sort_date">Fecha</string>
