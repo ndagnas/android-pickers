@@ -17,7 +17,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- *    Created by Nicolas Dagnas on 01-05-2020, updated on 08-05-2020.
+ *    Created by Nicolas Dagnas on 01-05-2020, updated on 16-06-2021.
  *
  */
 
@@ -67,22 +67,22 @@ public class FilePickerDialog extends ListPickerDialogBase implements PickerInte
      * FILE_SELECT specifies that from list of Files/Directories a File has to be selected. It is
      * the default Selection Type.
      */
-    public static final int FILE_SELECT = 0;
+    public static final int FILES = 0;
 
     /** DIR_SELECT specifies that from list of Files/Directories a Directory has to be selected. */
-    public static final int DIR_SELECT = 1;
+    public static final int DIRECTORIES = 1;
 
     /** FILE_AND_DIR_SELECT specifies that from list of Files/Directories both can be selected. */
-    public static final int FILE_AND_DIR_SELECT = 2;
+    public static final int FILES_AND_DIRECTORIES = 2;
 
     /** Directory separator. */
-    public static final String DIRECTORY_SEPERATOR = "/";
+    public static final String DIRECTORY_SEPARATOR = "/";
 
     /** Storage root directory. */
     public static final String STORAGE_DIR = "mnt";
 
     /** DEFAULT_DIR is the default mount point of the SDCARD. It is the default mount point. */
-    public static final String DEFAULT_DIR = DIRECTORY_SEPERATOR + STORAGE_DIR;
+    public static final String DEFAULT_DIR = DIRECTORY_SEPARATOR + STORAGE_DIR;
 
     /** SORT_BY_NAME specifies that list of Files/Directories is sorted by name. */
     public static final int SORT_BY_NAME = 0;
@@ -148,23 +148,33 @@ public class FilePickerDialog extends ListPickerDialogBase implements PickerInte
         public boolean accept(File File) {
             // All directories are added in the least that can be read by the Application
 
-            if (File.isDirectory() && File.canRead()) return true;
+            if (File.isDirectory()
+                    && File.canRead()
+                    && this.mDialog.mShowMode == FILES_AND_DIRECTORIES) return true;
 
-            // True for files, If the selection type is Directory type, ie.
-            // Only directory has to be selected from the list, then all files are ignored.
+            // False for files, If the show type is Directory type, ie.
 
-            if (this.mDialog.mSelectionType == FilePickerDialog.DIR_SELECT) return false;
-
-            // Validate if no filter
-
-            if (this.mDialog.mPatterns == null || this.mDialog.mPatterns.length == 0) return true;
+            if (File.isFile() && File.canRead() && this.mDialog.mShowMode == DIRECTORIES)
+                return false;
 
             // Check whether name of the file ends with the extension. Added if it does.
 
-            String fileName = File.getName().toLowerCase(Locale.getDefault());
+            String fileName = File.getName();
 
-            for (Pattern pattern : this.mDialog.mPatterns) {
-                if (pattern.matcher(fileName).matches()) return true;
+            if (File.isDirectory()) {
+                if (this.mDialog.mPathsPatterns == null || this.mDialog.mPathsPatterns.length == 0)
+                    return true;
+
+                for (Pattern pattern : this.mDialog.mPathsPatterns) {
+                    if (pattern.matcher(fileName).matches()) return true;
+                }
+            } else {
+                if (this.mDialog.mFilesPatterns == null || this.mDialog.mFilesPatterns.length == 0)
+                    return true;
+
+                for (Pattern pattern : this.mDialog.mFilesPatterns) {
+                    if (pattern.matcher(fileName).matches()) return true;
+                }
             }
 
             return false;
@@ -179,11 +189,13 @@ public class FilePickerDialog extends ListPickerDialogBase implements PickerInte
 
     private final Context mContext;
     private final int mRequestCode;
+    private final int mShowMode;
     private final int mSelectionType;
     private final File mRootDir;
     private final File mErrorDir;
     private final File mOffsetDir;
-    private final Pattern[] mPatterns;
+    private final Pattern[] mFilesPatterns;
+    private final Pattern[] mPathsPatterns;
     private int mSortBy;
     private int mSortOrder;
     private final boolean mToolbarIsVisible;
@@ -207,11 +219,13 @@ public class FilePickerDialog extends ListPickerDialogBase implements PickerInte
 
         this.mContext = builder.P.context;
         this.mRequestCode = builder.mRequestCode;
+        this.mShowMode = builder.mShowMode;
         this.mSelectionType = builder.mSelectionType;
         this.mRootDir = builder.mRootDir;
         this.mErrorDir = builder.mErrorDir;
         this.mOffsetDir = builder.mOffsetDir;
-        this.mPatterns = builder.mPatterns;
+        this.mFilesPatterns = builder.mFilesPatterns;
+        this.mPathsPatterns = builder.mPathsPatterns;
         this.mSortBy = builder.mSortBy;
         this.mSortOrder = builder.mSortOrder;
         this.mToolbarIsVisible = builder.mToolbarIsVisible;
@@ -794,8 +808,8 @@ public class FilePickerDialog extends ListPickerDialogBase implements PickerInte
             String subTitle = String.format(Locale.getDefault(), Label, itemDate);
 
             switch (this.mSelectionType) {
-                case FilePickerDialog.DIR_SELECT:
-                case FilePickerDialog.FILE_AND_DIR_SELECT:
+                case FilePickerDialog.DIRECTORIES:
+                case FilePickerDialog.FILES_AND_DIRECTORIES:
                     return new PickableItem(
                             fileItem.object.getName(),
                             subTitle,
@@ -862,11 +876,13 @@ public class FilePickerDialog extends ListPickerDialogBase implements PickerInte
 
         private final PickerParams P;
         private int mRequestCode = 0;
-        private int mSelectionType = FilePickerDialog.FILE_AND_DIR_SELECT;
+        private int mShowMode = FilePickerDialog.FILES_AND_DIRECTORIES;
+        private int mSelectionType = FilePickerDialog.FILES_AND_DIRECTORIES;
         private File mRootDir = new File(FilePickerDialog.DEFAULT_DIR);
         private File mErrorDir = new File(FilePickerDialog.DEFAULT_DIR);
         private File mOffsetDir = new File(FilePickerDialog.DEFAULT_DIR);
-        private Pattern[] mPatterns = new Pattern[0];
+        private Pattern[] mFilesPatterns;
+        private Pattern[] mPathsPatterns;
         private int mSortBy = FilePickerDialog.SORT_BY_NAME;
         private int mSortOrder = FilePickerDialog.SORT_ORDER_NORMAL;
         private boolean mToolbarIsVisible = true;
@@ -1024,6 +1040,19 @@ public class FilePickerDialog extends ListPickerDialogBase implements PickerInte
         }
 
         /**
+         * Sets show mode defines that whether a File/Directory or both of these has to be showed.
+         * Default value is FILES_AND_DIRECTORIES.
+         *
+         * <p>FILES, DIRECTORIES, FILES_AND_DIRECTORIES are the three selection types.
+         *
+         * @return this builder object to allow for chaining of calls to set methods
+         */
+        public Builder setShowMode(int showMode) {
+            this.mShowMode = showMode;
+            return this;
+        }
+
+        /**
          * Sets selection Type defines that whether a File/Directory or both of these has to be
          * selected. Default value is FILE_SELECT.
          *
@@ -1133,8 +1162,8 @@ public class FilePickerDialog extends ListPickerDialogBase implements PickerInte
          *
          * @return this builder object to allow for chaining of calls to set methods
          */
-        public Builder addPattern(@NonNull CharSequence pattern) {
-            return this.addPattern(Pattern.compile(pattern.toString()));
+        public Builder addFilesPattern(@NonNull CharSequence pattern) {
+            return this.addFilesPattern(Pattern.compile(pattern.toString()));
         }
 
         /**
@@ -1144,12 +1173,40 @@ public class FilePickerDialog extends ListPickerDialogBase implements PickerInte
          *
          * @return this builder object to allow for chaining of calls to set methods
          */
-        public Builder addPattern(@NonNull Pattern pattern) {
-            ArrayList<Pattern> patterns = new ArrayList<>(Arrays.asList(this.mPatterns));
+        public Builder addFilesPattern(@NonNull Pattern pattern) {
+            ArrayList<Pattern> patterns = new ArrayList<>(Arrays.asList(this.mFilesPatterns));
 
             patterns.add(pattern);
 
-            this.mPatterns = patterns.toArray(new Pattern[0]);
+            this.mFilesPatterns = patterns.toArray(new Pattern[0]);
+
+            return this;
+        }
+
+        /**
+         * Add pattern to filter paths.
+         *
+         * <p>Ex. "(.*)"
+         *
+         * @return this builder object to allow for chaining of calls to set methods
+         */
+        public Builder addPathsPattern(@NonNull CharSequence pattern) {
+            return this.addPathsPattern(Pattern.compile(pattern.toString()));
+        }
+
+        /**
+         * Add pattern to filter paths.
+         *
+         * <p>Ex. "(.*)"
+         *
+         * @return this builder object to allow for chaining of calls to set methods
+         */
+        public Builder addPathsPattern(@NonNull Pattern pattern) {
+            ArrayList<Pattern> patterns = new ArrayList<>(Arrays.asList(this.mPathsPatterns));
+
+            patterns.add(pattern);
+
+            this.mPathsPatterns = patterns.toArray(new Pattern[0]);
 
             return this;
         }

@@ -45,8 +45,8 @@ android {
     defaultConfig {
         minSdkVersion 26
         targetSdkVersion 29
-        versionCode 8
-        versionName "0.2.3"
+        versionCode 9
+        versionName "0.2.4"
     }
     buildTypes {
         release {
@@ -66,4 +66,5 @@ dependencies {
 if (project.rootProject.file('local.properties').exists()) {
 	apply from: 'https://raw.githubusercontent.com/ndagnas/JCenter/master/installv1.gradle'
 	apply from: 'https://raw.githubusercontent.com/ndagnas/JCenter/master/bintrayv1.gradle'
+
 }
