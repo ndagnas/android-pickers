@@ -13,7 +13,7 @@ ext {
     siteUrl = 'https://github.com/ndagnas/android-pickers'
     gitUrl = 'https://github.com/ndagnas/android-pickers.git'
 
-    libraryVersion = '0.2.4'
+    libraryVersion = '0.2.5'
 
     developerId = 'ndagnas'
     developerName = 'Nicolas Dagnas'
