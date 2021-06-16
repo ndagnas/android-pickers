@@ -103,13 +103,13 @@ public class MainActivity extends AppCompatActivity {
         switch (((RadioGroup) this.findViewById(R.id.activity_main_selection_type))
                 .getCheckedRadioButtonId()) {
             case R.id.activity_main_selection_type_file:
-                builder.setSelectionType(FilePickerDialog.FILES);
+                builder.setSelectionMode(FilePickerDialog.FILES);
                 break;
             case R.id.activity_main_selection_type_directory:
-                builder.setSelectionType(FilePickerDialog.DIRECTORIES);
+                builder.setSelectionMode(FilePickerDialog.DIRECTORIES);
                 break;
             case R.id.activity_main_selection_type_files_and_directories:
-                builder.setSelectionType(FilePickerDialog.FILES_AND_DIRECTORIES);
+                builder.setSelectionMode(FilePickerDialog.FILES_AND_DIRECTORIES);
                 break;
         }
 

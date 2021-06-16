@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- *    Created by Nicolas Dagnas on 01-05-2020, updated on 08-05-2020.
+ *    Created by Nicolas Dagnas on 01-05-2020, updated on 03-06-20201.
  *
  */
 
@@ -24,6 +24,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.DrawableRes;
@@ -43,7 +44,6 @@ import java.util.Comparator;
 /** Defines a json picker dialog. */
 @SuppressWarnings({"unused", "WeakerAccess"})
 public class JSonPickerDialog extends ListPickerDialogBase implements PickerInterface {
-
     /* SELECTION_TYPES */
 
     /**
@@ -113,6 +113,7 @@ public class JSonPickerDialog extends ListPickerDialogBase implements PickerInte
     private final int mSortOrder;
     private final OnSingleChoiceValidationListener<JSONObject> mOnSingleChoiceValidationListener;
     private final OnMultiChoiceValidationListener<JSONObject> mOnMultiChoiceValidationListener;
+    private final boolean mOneClickMode;
     private final boolean mTitleNodeNameDefined;
     private final boolean mSubTitleNodeNameDefined;
     private final boolean mChildrenNodeNameDefined;
@@ -144,6 +145,8 @@ public class JSonPickerDialog extends ListPickerDialogBase implements PickerInte
         this.mOnSingleChoiceValidationListener = builder.mOnSingleChoiceValidationListener;
         this.mOnMultiChoiceValidationListener = builder.mOnMultiChoiceValidationListener;
 
+        this.mOneClickMode = (builder.P.positiveButtonVisibility != View.VISIBLE);
+
         this.mTitleNodeNameDefined = (!TextUtils.isEmpty(this.mTitleNodeName));
         this.mSubTitleNodeNameDefined = (!TextUtils.isEmpty(this.mSubTitleNodeName));
         this.mChildrenNodeNameDefined = (!TextUtils.isEmpty(this.mChildrenNodeName));
@@ -162,7 +165,9 @@ public class JSonPickerDialog extends ListPickerDialogBase implements PickerInte
         final Comparator<JSONItem> comparator;
 
         final int reversed = ((dialog.mSortOrder == JSonPickerDialog.SORT_ORDER_REVERSE) ? -1 : 1);
+
         if (dialog.mSortBy == JSonPickerDialog.SORT_BY_HAVE_CHILDREN) {
+
             comparator =
                     new Comparator<JSONItem>() {
                         @Override
@@ -218,13 +223,10 @@ public class JSonPickerDialog extends ListPickerDialogBase implements PickerInte
                                                 * reversed;
                                 }
                             } catch (Exception Err) {
-                                Log.e(
-                                        "JSonPickerDialog.createComparator",
-                                        "Exception: " + Err.toString());
+                                Log.e("JSonPicker.comparator", "Exception: " + Err.toString());
                             }
 
                             // Same as above but order of occurrence is different.
-
                             return -1 * reversed;
                         }
                     };
@@ -263,15 +265,14 @@ public class JSonPickerDialog extends ListPickerDialogBase implements PickerInte
                                                 * reversed;
                                 }
                             } catch (Exception Err) {
-                                Log.e(
-                                        "JSonPickerDialog.createComparator",
-                                        "Exception: " + Err.toString());
+                                Log.e("JSonPicker.comparator", "Exception: " + Err.toString());
                             }
 
                             return -1 * reversed;
                         }
                     };
         }
+
         return comparator;
     }
 
@@ -343,9 +344,7 @@ public class JSonPickerDialog extends ListPickerDialogBase implements PickerInte
                                 if (jsonChild.has(this.mTitleNodeName))
                                     sortedObjects.add(new JSONItem(jsonChild, jsonTag));
                             } catch (Exception Err) {
-                                Log.e(
-                                        "JSonPickerDialog.getChildrenFor",
-                                        "Exception: " + Err.toString());
+                                Log.e("JSonPicker.childrenFor", "Exception: " + Err.toString());
                             }
                         }
 
@@ -357,7 +356,7 @@ public class JSonPickerDialog extends ListPickerDialogBase implements PickerInte
                             if (newItem != null) itemList.add(newItem);
                         }
                     } catch (Exception Err) {
-                        Log.e("JSonPickerDialog.getChildrenFor", "Exception: " + Err.toString());
+                        Log.e("JSonPicker.childrenFor", "Exception: " + Err.toString());
                     }
                 } else {
                     Toast.makeText(
@@ -441,7 +440,7 @@ public class JSonPickerDialog extends ListPickerDialogBase implements PickerInte
                     return new ItemBase(
                             tTitle, subTitle.toString(), R.drawable.ic_json_picker_header);
                 } catch (Exception Err) {
-                    Log.e("JSonPickerDialog.getTitleItem", "Exception: " + Err.toString());
+                    Log.e("JSonPicker.getTitleItem", "Exception: " + Err.toString());
                 }
             }
         }
@@ -465,11 +464,11 @@ public class JSonPickerDialog extends ListPickerDialogBase implements PickerInte
      * @param items collection of picked items.
      */
     @Override
-    protected void onValidateSelection(Collection<PickableItem> items) {
+    protected void onValidateSelection(Collection<PickerItem> items) {
         if (items.size() > 0) {
             ArrayList<JSONObject> result = new ArrayList<>();
 
-            for (PickableItem item : items) {
+            for (PickerItem item : items) {
                 Object itemTag = item.getTag();
 
                 if (itemTag instanceof JSONItem) {
@@ -496,6 +495,10 @@ public class JSonPickerDialog extends ListPickerDialogBase implements PickerInte
      */
     private PickerItem createItem(@NonNull JSONItem jsonItem) {
         if (this.mTitleNodeNameDefined) {
+            // Mode Sélectionnable ?
+
+            boolean isPickable = !this.mOneClickMode;
+
             try {
                 String title = jsonItem.object.getString(this.mTitleNodeName);
 
@@ -524,52 +527,56 @@ public class JSonPickerDialog extends ListPickerDialogBase implements PickerInte
 
                             hasChildren = (jsonArray.length() > 0);
                         } catch (Exception Err) {
-                            Log.e("JSonPickerDialog.createItem", "Exception: " + Err.toString());
+                            Log.e("JSonPicker.createItem", "Exception: " + Err.toString());
                         }
                     }
 
                     if (hasChildren) {
                         if (this.mSelectionType == JSonPickerDialog.ALL_NODE_SELECT)
-                            return new PickableItem(
+                            return new PickerItem(
                                     title,
                                     subTitle,
                                     R.drawable.ic_json_picker_node_has_children,
                                     jsonItem,
-                                    true);
+                                    true,
+                                    isPickable);
                         else
                             return new PickerItem(
                                     title,
                                     subTitle,
                                     R.drawable.ic_json_picker_node_has_children,
                                     jsonItem,
-                                    true);
+                                    true,
+                                    false);
                     } else {
-                        return new PickableItem(
+                        return new PickerItem(
                                 title,
                                 subTitle,
                                 R.drawable.ic_json_picker_single_node,
                                 jsonItem,
-                                false);
+                                false,
+                                isPickable);
                     }
                 } else {
-                    return new PickableItem(
+                    return new PickerItem(
                             title,
                             subTitle,
                             R.drawable.ic_json_picker_single_node,
                             jsonItem,
-                            false);
+                            false,
+                            isPickable);
                 }
             } catch (Exception Err) {
-                Log.e("JSonPickerDialog.createItem", "Exception: " + Err.toString());
+                Log.e("JSonPicker.createItem", "Exception: " + Err.toString());
             }
         }
+
         return null;
     }
 
     /** Provide a builder for a json picker dialog. */
     @SuppressWarnings("UnusedReturnValue")
     public static class Builder {
-
         // Attributes
 
         private final PickerParams P;
@@ -616,7 +623,7 @@ public class JSonPickerDialog extends ListPickerDialogBase implements PickerInte
          * @return this builder object to allow for chaining of calls to set methods
          */
         public Builder setIcon(@DrawableRes int iconId) {
-            this.P.iconId = iconId;
+            if (iconId != 0) this.P.iconId = iconId;
             return this;
         }
 
@@ -626,7 +633,7 @@ public class JSonPickerDialog extends ListPickerDialogBase implements PickerInte
          * @return this builder object to allow for chaining of calls to set methods
          */
         public Builder setTitle(@StringRes int titleId) {
-            this.P.title = this.P.context.getText(titleId);
+            if (titleId != 0) this.P.title = this.P.context.getText(titleId);
             return this;
         }
 
@@ -636,7 +643,7 @@ public class JSonPickerDialog extends ListPickerDialogBase implements PickerInte
          * @return this builder object to allow for chaining of calls to set methods
          */
         public Builder setTitle(@Nullable CharSequence title) {
-            this.P.title = title;
+            if (!TextUtils.isEmpty(title)) this.P.title = title;
             return this;
         }
 
@@ -647,7 +654,8 @@ public class JSonPickerDialog extends ListPickerDialogBase implements PickerInte
          * @return this builder object to allow for chaining of calls to set methods
          */
         public Builder setPositiveButton(@StringRes int textId) {
-            this.P.positiveButtonText = this.P.context.getText(textId);
+            if (textId != 0) this.P.positiveButtonText = this.P.context.getText(textId);
+
             return this;
         }
 
@@ -658,7 +666,8 @@ public class JSonPickerDialog extends ListPickerDialogBase implements PickerInte
          * @return this builder object to allow for chaining of calls to set methods
          */
         public Builder setPositiveButton(CharSequence text) {
-            this.P.positiveButtonText = text;
+            if (!TextUtils.isEmpty(text)) this.P.positiveButtonText = text;
+
             return this;
         }
 
@@ -673,13 +682,24 @@ public class JSonPickerDialog extends ListPickerDialogBase implements PickerInte
         }
 
         /**
+         * Set visibility of the positive button of the dialog.
+         *
+         * @return this builder object to allow for chaining of calls to set methods
+         */
+        public Builder setPositiveButtonVisibility(int visibility) {
+            this.P.positiveButtonVisibility = visibility;
+            return this;
+        }
+
+        /**
          * Set a listener to be invoked when the negative button of the dialog is pressed.
          *
          * @param textId The resource id of the text to display in the negative button
          * @return this builder object to allow for chaining of calls to set methods
          */
         public Builder setNegativeButton(@StringRes int textId) {
-            this.P.negativeButtonText = this.P.context.getText(textId);
+            if (textId != 0) this.P.negativeButtonText = this.P.context.getText(textId);
+
             return this;
         }
 
@@ -690,7 +710,8 @@ public class JSonPickerDialog extends ListPickerDialogBase implements PickerInte
          * @return this builder object to allow for chaining of calls to set methods
          */
         public Builder setNegativeButton(CharSequence text) {
-            this.P.negativeButtonText = text;
+            if (!TextUtils.isEmpty(text)) this.P.negativeButtonText = text;
+
             return this;
         }
 
@@ -701,6 +722,16 @@ public class JSonPickerDialog extends ListPickerDialogBase implements PickerInte
          */
         public Builder setNegativeButtonListener(OnClickListener listener) {
             this.P.negativeButtonListener = listener;
+            return this;
+        }
+
+        /**
+         * Set visibility of the negative button of the dialog.
+         *
+         * @return this builder object to allow for chaining of calls to set methods
+         */
+        public Builder setNegativeButtonVisibility(int visibility) {
+            this.P.negativeButtonVisibility = visibility;
             return this;
         }
 

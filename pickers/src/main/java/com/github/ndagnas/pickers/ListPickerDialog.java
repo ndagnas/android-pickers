@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- *    Created by Nicolas Dagnas on 02-05-2020, updated on 08-05-2020.
+ *    Created by Nicolas Dagnas on 02-05-2020, updated on 03-06-20201
  *
  */
 
@@ -34,7 +34,6 @@ import java.util.Collection;
 /** Defines a file picker dialog. */
 @SuppressWarnings({"unused"})
 public class ListPickerDialog extends ListPickerDialogBase implements PickerInterface {
-
     // Constants
 
     private static java.util.Locale DEF_LOCAL = java.util.Locale.getDefault();
@@ -125,14 +124,13 @@ public class ListPickerDialog extends ListPickerDialogBase implements PickerInte
      * @param items collection of picked items.
      */
     @Override
-    protected void onValidateSelection(Collection<PickableItem> items) {
+    protected void onValidateSelection(Collection<PickerItem> items) {
         this.mListener.onValidateSelection(items);
     }
 
     /** Provide a builder for a list picker dialog. */
-    @SuppressWarnings("UnusedReturnValue")
+    @SuppressWarnings({"UnusedReturnValue", "WeakerAccess"})
     public static class Builder {
-
         // Attributes
 
         private final PickerParams P;
@@ -154,7 +152,6 @@ public class ListPickerDialog extends ListPickerDialogBase implements PickerInte
          * @param themeResId the resource ID of the theme against which to inflate this dialog, or
          *     {@code 0} to use the parent {@code context}'s default dialog dialog theme
          */
-        @SuppressWarnings("WeakerAccess")
         public Builder(@NonNull Context context, @StyleRes int themeResId) {
             this.P = new PickerParams(context, themeResId);
 

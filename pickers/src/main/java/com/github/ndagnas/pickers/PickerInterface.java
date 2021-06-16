@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- *    Created by Nicolas Dagnas on 08-05-2020.
+ *    Created by Nicolas Dagnas on 03-06-20201.
  *
  */
 
@@ -79,7 +79,7 @@ public interface PickerInterface {
          *
          * @param items collection of picked items.
          */
-        void onValidateSelection(Collection<ListPickerDialogBase.PickableItem> items);
+        void onValidateSelection(Collection<ListPickerDialogBase.PickerItem> items);
     }
 
     /**

@@ -39,7 +39,7 @@ Android Library to create picker dialogs.
 ```
 
 ```gradle
-    compile 'com.github.ndagnas:android-pickers:0.2.6'
+    compile 'com.github.ndagnas:android-pickers:0.3.0'
 ```
 
 ### Autorisation (Android 10 or more)
@@ -63,7 +63,7 @@ Use same of AlertDialog.
 			.setOffsetDir(FilePickerDialog.DEFAULT_DIR)
 			.setRootDir(FilePickerDialog.DEFAULT_DIR)
 			.setErrorDir(FilePickerDialog.DEFAULT_DIR)
-			.setSelectionType(FilePickerDialog.FILE_SELECT)
+			.setSelectionMode(FilePickerDialog.FILE_SELECT)
 			.setOnSingleChoiceValidationListener(
 				new PickerInterface.OnSingleChoiceValidationListener<String>() {
 					@Override
@@ -113,7 +113,7 @@ Marshmallow and above requests for the permission on runtime. You should overrid
 </p>
 
 ### License
-    Copyright (C) 2020 Nicolas Dagnas
+    Copyright (C) 2021 Nicolas Dagnas
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
