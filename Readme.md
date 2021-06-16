@@ -33,7 +33,7 @@ Android Library to create picker dialogs.
 ```gradle
     repositories {
 		...
-        jcenter()
+        maven { url 'https://jitpack.io' }
 		...
     }
 ```
